@@ -4,1413 +4,1444 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CurVina — Resume Tailor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+
+    <!-- Google Fonts: Playfair Display (serif) + Inter (sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+
+    <!-- RAGina.js CDN -->
+    <script src="https://cdn.jsdelivr.net/gh/suryasticsai/RAGina/ragina.min.js">
+    </script>
+
     <style>
-        /* ──────────────────────────────────────────────────────────
-                   BASE & OCEAN THEME (unchanged)
-                ────────────────────────────────────────────────────────── */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ================================================================
+                   CURVINA PHASE 0 – LETTERHEAD STYLES
+                ================================================================ */
+
+        /* ────────── RESET ────────── */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
-            background: #0a1f2b;
-            color: #e8f0f5;
-            overflow-x: hidden;
-            transition: background 0.8s ease;
-            cursor: crosshair;
-        }
-        body.night-mode { background: #060f14; }
-
-        #ocean-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-        .rays-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
-            background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(255,255,220,0.04) 0%, transparent 60%),
-                        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(200,240,255,0.03) 0%, transparent 50%),
-                        radial-gradient(ellipse 70% 40% at 80% 0%, rgba(255,240,200,0.03) 0%, transparent 55%);
-            animation: rayShift 12s ease-in-out infinite alternate;
-            transition: opacity 0.8s ease;
-        }
-        body.night-mode .rays-overlay {
-            opacity: 0.15;
-            background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(100,200,255,0.02) 0%, transparent 60%),
-                        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(150,220,255,0.015) 0%, transparent 50%);
-        }
-        @keyframes rayShift {
-            0% { transform: translateX(-2%) scale(1); }
-            50% { transform: translateX(1%) scale(1.02); }
-            100% { transform: translateX(-1%) scale(0.98); }
+            background: #e8e0d8;
+            /* warm paper tone */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 32px 20px;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(200, 180, 160, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(180, 160, 140, 0.10) 0%, transparent 50%);
         }
 
-        .cursor-light {
-            position: fixed; width: 300px; height: 300px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,255,200,0.06) 0%, transparent 70%);
-            pointer-events: none; z-index: 2; transform: translate(-50%, -50%);
-            transition: opacity 0.3s; mix-blend-mode: screen;
-        }
-        body.night-mode .cursor-light { background: radial-gradient(circle, rgba(100,200,255,0.08) 0%, transparent 70%); }
-
-        .bubble-particle {
-            position: fixed; border-radius: 50%; pointer-events: none; z-index: 3;
-            animation: bubbleRise var(--duration) ease-out forwards;
-        }
-        @keyframes bubbleRise {
-            0% { transform: translateY(0) scale(1); opacity: var(--start-opacity); }
-            30% { transform: translateY(calc(var(--rise) * -0.3)) scale(1.1); opacity: var(--peak-opacity); }
-            100% { transform: translateY(calc(var(--rise) * -1)) scale(0.3); opacity: 0; }
-        }
-
-        .ripple {
-            position: fixed; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
-            pointer-events: none; z-index: 3; animation: rippleExpand 1.2s ease-out forwards;
-        }
-        @keyframes rippleExpand {
-            0% { width: 0; height: 0; opacity: 0.6; }
-            100% { width: 200px; height: 200px; opacity: 0; margin-left: -100px; margin-top: -100px; }
-        }
-
-        .app-wrapper {
-            position: relative; z-index: 10; max-width: 1400px; margin: 0 auto; padding: 20px;
-        }
-
-        .app-header {
-            background: rgba(10, 30, 45, 0.75); backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.06); padding: 12px 24px; margin-bottom: 24px;
-            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-            border-radius: 0; transition: background 0.8s ease, box-shadow 0.3s;
-        }
-        .app-header:hover { box-shadow: 0 0 30px rgba(255, 180, 50, 0.1); }
-        body.night-mode .app-header { background: rgba(4, 12, 18, 0.85); }
-
-        .brand {
-            display: flex; align-items: center; gap: 12px; font-size: 1.5rem; font-weight: 700;
-            color: #ffffff; text-decoration: none; transition: transform 0.2s;
-        }
-        .brand:hover { transform: scale(1.02); }
-        .brand i { font-size: 1.8rem; color: #ffb347; animation: brandFloat 3s ease-in-out infinite; }
-        @keyframes brandFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-3px) rotate(3deg); }
-        }
-        .brand span { font-weight: 300; color: #8ab0c0; font-size: 0.85rem; margin-left: 4px; }
-
-        .nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .nav-links .btn {
-            border-radius: 0; font-weight: 500; font-size: 0.85rem; padding: 6px 16px;
-            border: 1px solid transparent; transition: all 0.2s; color: #c0d8e0; background: transparent;
-            position: relative; overflow: hidden;
-        }
-        .nav-links .btn::after {
-            content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 2px;
-            background: #ffd966; transition: all 0.3s; transform: translateX(-50%);
-        }
-        .nav-links .btn:hover::after { width: 60%; }
-        .nav-links .btn:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.08); color: #ffffff; transform: translateY(-1px); }
-        .nav-links .btn.active { background: rgba(255, 215, 0, 0.12); border-color: #ffd966; color: #ffd966; }
-        .nav-links .btn.active::after { width: 80%; }
-
-        .toggle-wrap { display: flex; align-items: center; gap: 10px; }
-        .toggle-wrap label { font-size: 0.75rem; font-weight: 500; color: #8ab0c0; margin: 0; cursor: pointer; }
-        .toggle-switch {
-            position: relative; width: 48px; height: 26px; background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer; transition: all 0.3s; border-radius: 0; flex-shrink: 0;
-        }
-        .toggle-switch.active { background: rgba(255, 215, 0, 0.2); border-color: #ffd966; }
-        .toggle-switch .thumb {
-            position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #ffd966;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 0;
-            box-shadow: 0 0 10px rgba(255, 180, 50, 0.3);
-        }
-        .toggle-switch.active .thumb { left: 24px; background: #88ccff; box-shadow: 0 0 10px rgba(100, 200, 255, 0.4); }
-        .toggle-switch .icon-sun, .toggle-switch .icon-moon {
-            position: absolute; top: 50%; transform: translateY(-50%); font-size: 0.7rem; pointer-events: none; transition: opacity 0.3s;
-        }
-        .toggle-switch .icon-sun { left: 6px; opacity: 1; color: #ffb347; }
-        .toggle-switch .icon-moon { right: 6px; opacity: 0.3; color: #88ccff; }
-        .toggle-switch.active .icon-sun { opacity: 0.3; }
-        .toggle-switch.active .icon-moon { opacity: 1; }
-
-        .page { display: none; animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .page.active { display: block; }
-        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-
-        .card-sharp {
-            background: rgba(10, 30, 45, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 0; padding: 20px 24px; transition: all 0.3s ease; position: relative; overflow: hidden;
-        }
-        .card-sharp::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, #ffd966, transparent); transition: left 0.6s ease;
-        }
-        .card-sharp:hover::before { left: 100%; }
-        .card-sharp:hover {
-            background: rgba(10, 30, 45, 0.75); border-color: rgba(255, 215, 0, 0.15);
-            transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        body.night-mode .card-sharp { background: rgba(4, 12, 18, 0.7); }
-        body.night-mode .card-sharp:hover {
-            background: rgba(4, 12, 18, 0.85); border-color: rgba(100, 200, 255, 0.15);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(100, 200, 255, 0.05);
-        }
-        .card-sharp .card-title {
-            font-weight: 600; font-size: 1.1rem; color: #d0e4ec; margin-bottom: 16px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .card-sharp .card-title i { color: #ffb347; }
-
-        .tab-group-sharp {
-            display: flex; gap: 4px; background: rgba(0, 0, 0, 0.3); padding: 2px; margin-bottom: 16px;
-            flex-wrap: wrap; border-radius: 0;
-        }
-        .tab-group-sharp .tab-btn {
-            background: transparent; border: none; padding: 6px 16px; color: #8ab0c0;
-            font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit;
-            border-radius: 0; position: relative;
-        }
-        .tab-group-sharp .tab-btn.active { background: #ffd966; color: #0a2f44; box-shadow: 0 2px 8px rgba(255, 180, 50, 0.2); }
-        .tab-group-sharp .tab-btn:hover:not(.active) { color: #d0ecff; background: rgba(255, 255, 255, 0.03); }
-
-        .input-sharp {
-            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 0;
-            padding: 10px 14px; color: #e0f0fa; font-size: 0.95rem; outline: none; transition: all 0.2s; width: 100%; font-family: inherit;
-        }
-        .input-sharp:focus { border-color: #ffd966; box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1); }
-        .input-sharp::placeholder { color: rgba(255, 255, 255, 0.25); }
-
-        .file-upload-sharp {
-            border: 1px dashed rgba(255, 215, 0, 0.25); border-radius: 0; padding: 30px 10px; text-align: center;
-            cursor: pointer; transition: all 0.3s; background: rgba(255, 215, 0, 0.02); position: relative; overflow: hidden;
-        }
-        .file-upload-sharp:hover { background: rgba(255, 215, 0, 0.06); border-color: rgba(255, 215, 0, 0.4); transform: scale(1.01); }
-        .file-upload-sharp input { display: none; }
-
-        .btn-primary-sharp {
-            background: #ffd966; color: #0a2f44; border: none; padding: 8px 20px; border-radius: 0;
-            font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; position: relative; overflow: hidden;
-        }
-        .btn-primary-sharp:hover { background: #ffe08a; transform: scale(1.02); box-shadow: 0 4px 15px rgba(255, 180, 50, 0.3); }
-        .btn-primary-sharp:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .btn-outline-sharp {
-            background: transparent; border: 1px solid rgba(255, 255, 255, 0.08); padding: 8px 18px;
-            border-radius: 0; color: #c0d8e0; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit;
-        }
-        .btn-outline-sharp:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.15); color: #ffffff; transform: translateY(-1px); }
-
-        .btn-tailor-sharp {
-            background: linear-gradient(145deg, #ffb347, #ff8c00); border: none; padding: 14px 48px;
-            border-radius: 0; font-size: 1.1rem; font-weight: 700; color: #0a2f44; cursor: pointer;
-            transition: all 0.25s; box-shadow: 0 4px 20px rgba(255, 150, 0, 0.25); font-family: inherit;
-            position: relative; overflow: hidden;
-        }
-        .btn-tailor-sharp::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
-            transform: rotate(45deg); transition: all 0.5s; opacity: 0;
-        }
-        .btn-tailor-sharp:hover::after { opacity: 1; left: 100%; }
-        .btn-tailor-sharp:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 6px 30px rgba(255, 150, 0, 0.4); }
-        .btn-tailor-sharp:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .btn-demo-sharp {
-            background: linear-gradient(145deg, #4fc3f7, #0288d1); color: #ffffff; border: none;
-            padding: 10px 30px; border-radius: 0; font-weight: 600; cursor: pointer; transition: all 0.25s;
-            font-family: inherit; box-shadow: 0 4px 15px rgba(2, 136, 209, 0.3);
-        }
-        .btn-demo-sharp:hover { transform: scale(1.03); box-shadow: 0 6px 25px rgba(2, 136, 209, 0.5); }
-        .btn-demo-sharp:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .btn-curify-sharp {
-            background: #00b894; color: #ffffff; border: none; padding: 4px 14px; border-radius: 0;
-            font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .btn-curify-sharp:hover { background: #00a381; transform: scale(1.05); box-shadow: 0 2px 10px rgba(0, 184, 148, 0.4); }
-        .btn-curify-sharp:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .preview-box {
-            background: rgba(0, 0, 0, 0.2); padding: 12px 16px; margin-top: 12px; font-size: 0.9rem;
-            border-left: 3px solid #ffd966; max-height: 120px; overflow-y: auto; color: #b8dce8; border-radius: 0;
-            transition: all 0.3s;
-        }
-        .preview-box:hover { background: rgba(0, 0, 0, 0.3); border-left-width: 4px; }
-        .preview-box strong { color: #ffd966; }
-
-        .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        @media (max-width: 800px) { .editor-grid { grid-template-columns: 1fr; } }
-        .editor-card {
-            background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.04); padding: 18px;
-            border-radius: 0; transition: all 0.3s;
-        }
-        .editor-card:hover { border-color: rgba(255, 215, 0, 0.1); }
-        .editor-card h4 { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 500; color: #b0d8e8; }
-        .form-group { margin-bottom: 14px; }
-        .form-group label {
-            display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;
-            color: #8ab0c0; margin-bottom: 4px; font-weight: 500;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 0; padding: 8px 12px; color: #dcecf5; font-size: 0.9rem; transition: all 0.2s;
-            outline: none; font-family: inherit;
-        }
-        .form-group input:focus, .form-group textarea:focus { border-color: #ffd966; box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1); }
-        .array-item {
-            background: rgba(255, 215, 0, 0.04); padding: 10px; margin-bottom: 8px;
-            border-left: 3px solid #ffb347; border-radius: 0; transition: all 0.2s;
-        }
-        .array-item:hover { background: rgba(255, 215, 0, 0.07); transform: translateX(2px); }
-
-        .export-bar {
-            display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; justify-content: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 20px;
-        }
-        .export-bar .btn { border-radius: 0; font-weight: 500; padding: 10px 22px; transition: all 0.2s; }
-        .export-bar .btn:hover { transform: translateY(-2px); }
-
-        .loader {
-            display: none; align-items: center; justify-content: center; gap: 16px; padding: 20px 0;
-            color: #ffd966; font-size: 1rem;
-        }
-        .loader.show { display: flex; }
-        .loader i { font-size: 2rem; animation: swim 1.2s ease-in-out infinite alternate; }
-        @keyframes swim { 0% { transform: translateX(-8px) rotate(-4deg); } 100% { transform: translateX(8px) rotate(4deg); } }
-
-        .about-avatar {
-            width: 100px; height: 100px; border-radius: 0; background: rgba(255, 215, 0, 0.1);
-            border: 2px solid rgba(255, 215, 0, 0.2); display: flex; align-items: center; justify-content: center;
-            font-size: 3rem; color: #ffb347; transition: all 0.3s;
-        }
-        .about-avatar:hover { transform: scale(1.05) rotate(3deg); border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 20px rgba(255, 180, 50, 0.2); }
-        .social-links .btn {
-            border-radius: 0; padding: 8px 16px; font-size: 0.85rem; font-weight: 500; min-width: 100px;
-            text-align: center; transition: all 0.2s;
-        }
-        .social-links .btn:hover { transform: translateY(-2px); }
-
-        .app-footer {
-            background: rgba(10, 30, 45, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 16px 24px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: 12px; border-radius: 0; transition: background 0.8s ease;
-        }
-        body.night-mode .app-footer { background: rgba(4, 12, 18, 0.7); }
-        .footer-brand {
-            display: flex; align-items: center; gap: 10px; font-size: 1rem; font-weight: 600;
-            color: #c0d8e0; text-decoration: none; transition: all 0.2s;
-        }
-        .footer-brand:hover { color: #ffffff; }
-        .footer-brand i { color: #ffb347; font-size: 1.2rem; animation: brandFloat 3s ease-in-out infinite; }
-        .footer-social { display: flex; gap: 8px; flex-wrap: wrap; }
-        .footer-social .btn {
-            border-radius: 0; padding: 4px 12px; font-size: 0.75rem; font-weight: 500; color: #8ab0c0;
-            border: 1px solid rgba(255, 255, 255, 0.04); background: transparent; transition: all 0.2s;
-        }
-        .footer-social .btn:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); color: #ffffff; transform: translateY(-1px); }
-        .footer-copy { font-size: 0.7rem; color: #6a8f9e; }
-
-        @media (max-width: 768px) {
-            .app-header { flex-direction: column; align-items: stretch; gap: 12px; }
-            .nav-links { justify-content: center; }
-            .toggle-wrap { justify-content: center; }
-            .app-footer { flex-direction: column; align-items: center; text-align: center; }
-            .editor-grid { grid-template-columns: 1fr; }
-            .cursor-light { display: none; }
-        }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #ffb347; border-radius: 0; }
-
-        .hidden { display: none !important; }
-        .text-muted { color: #8ab0c0; }
-        .gap-8 { gap: 8px; }
-        .mt-12 { margin-top: 12px; }
-        .w-full { width: 100%; }
-
-        .mermaid-float {
-            position: fixed; bottom: 30px; right: 30px; font-size: 3.5rem; z-index: 10; pointer-events: none;
-            filter: drop-shadow(0 0 30px rgba(255, 180, 50, 0.4)); opacity: 0.7;
-            transition: all 0.8s ease; animation: mermaidFloat 6s ease-in-out infinite;
-        }
-        body.night-mode .mermaid-float { filter: drop-shadow(0 0 40px rgba(100, 200, 255, 0.5)); opacity: 0.8; }
-        @keyframes mermaidFloat {
-            0%, 100% { transform: translateY(0) rotate(-2deg); }
-            25% { transform: translateY(-15px) rotate(1deg); }
-            50% { transform: translateY(-5px) rotate(0deg); }
-            75% { transform: translateY(-20px) rotate(-1deg); }
-        }
-
-        /* ──────────────────────────────────────────────────────────
-                   COMPARISON PANEL STYLES
-                ────────────────────────────────────────────────────────── */
-        .comparison-panel {
-            margin-top: 24px;
-            border-top: 2px solid rgba(255, 215, 0, 0.15);
-            padding-top: 24px;
-        }
-        .comparison-panel .panel-title {
-            font-size: 1.2rem; font-weight: 700; color: #ffd966; margin-bottom: 16px;
-        }
-        .comparison-col {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 16px;
-            height: 100%;
+        /* ────────── PAPER / LETTERHEAD ────────── */
+        .letterhead {
+            max-width: 1100px;
+            width: 100%;
+            background: #fcf9f5;
+            /* warm white paper */
             border-radius: 0;
-            transition: all 0.3s;
+            box-shadow:
+                0 2px 4px rgba(0, 0, 0, 0.02),
+                0 8px 24px rgba(0, 0, 0, 0.06),
+                0 24px 64px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            padding: 48px 56px 40px;
+            position: relative;
+            transition: box-shadow 0.3s;
         }
-        .comparison-col:hover { border-color: rgba(255, 215, 0, 0.1); }
-        .comparison-col h5 {
-            font-weight: 600; font-size: 0.9rem; color: #b0d8e8; margin-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04); padding-bottom: 8px;
+
+        /* ── Letterhead border (subtle watermark frame) ── */
+        .letterhead::before {
+            content: '';
+            position: absolute;
+            inset: 16px;
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            pointer-events: none;
+            border-radius: 0;
         }
-        .comparison-col ul { list-style: none; padding-left: 0; }
-        .comparison-col ul li {
-            padding: 4px 0; font-size: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            display: flex; align-items: center; gap: 8px;
+
+        /* ── Gold top bar ── */
+        .letterhead::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 56px;
+            right: 56px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #c9a84c, #b8943a, #c9a84c, transparent);
+            border-radius: 0;
+            opacity: 0.6;
         }
-        .comparison-col ul li::before {
-            content: '▸'; color: #ffb347; font-weight: 600;
+
+        /* ────────── HEADER (CREST + TITLE) ────────── */
+        .letterhead-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(201, 168, 76, 0.2);
+            margin-bottom: 28px;
         }
-        .comparison-col textarea {
-            width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 0; padding: 6px 10px; color: #dcecf5; font-size: 0.85rem; font-family: inherit;
-            transition: all 0.2s; outline: none; resize: vertical; min-height: 60px;
+
+        /* ── Crest / Emblem ── */
+        .crest {
+            flex-shrink: 0;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1a2a3a, #0a1f2b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            color: #c9a84c;
+            box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: transform 0.2s;
+            user-select: none;
         }
-        .comparison-col textarea:focus { border-color: #ffd966; box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1); }
-        .comparison-col .curify-actions {
-            display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; justify-content: flex-end;
+        .crest:hover {
+            transform: scale(1.04);
         }
-        .badge-jd {
-            background: rgba(255, 215, 0, 0.1); color: #ffd966; padding: 0.2rem 0.6rem;
-            border-radius: 0; font-size: 0.7rem; font-weight: 500;
+        .crest i {
+            filter: drop-shadow(0 0 6px rgba(201, 168, 76, 0.2));
         }
-        .badge-curated {
-            background: rgba(0, 184, 148, 0.15); color: #55efc4; padding: 0.2rem 0.6rem;
-            border-radius: 0; font-size: 0.7rem; font-weight: 500;
+
+        /* ── Title block ── */
+        .letterhead-title {
+            flex: 1;
         }
-        .custom-prompt-area {
-            background: rgba(0, 0, 0, 0.15); padding: 12px 16px; margin-bottom: 16px;
-            border-left: 3px solid #4fc3f7;
+        .letterhead-title h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+            color: #1a2a3a;
+            line-height: 1.1;
+            margin: 0;
         }
-        .custom-prompt-area textarea {
-            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 0; padding: 8px 12px; color: #dcecf5; font-size: 0.9rem; width: 100%;
-            outline: none; transition: all 0.2s; font-family: inherit; margin-top: 6px;
+        .letterhead-title h1 span {
+            color: #c9a84c;
         }
-        .custom-prompt-area textarea:focus { border-color: #4fc3f7; box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.1); }
+        .letterhead-title .sub {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 0.85rem;
+            color: #6a7a8a;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .letterhead-title .sub i {
+            color: #c9a84c;
+            font-size: 0.7rem;
+        }
+
+        /* ── Motto / Tagline ── */
+        .motto {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: #8a7a6a;
+            letter-spacing: 0.5px;
+            border-left: 2px solid rgba(201, 168, 76, 0.3);
+            padding-left: 16px;
+            opacity: 0.7;
+        }
+
+        /* ────────── NOTIFICATION TOASTS ────────── */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+            width: 100%;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            background: rgba(20, 30, 45, 0.92);
+            backdrop-filter: blur(12px);
+            border-left: 4px solid #c9a84c;
+            padding: 14px 20px;
+            border-radius: 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            color: #f0ece6;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transform: translateX(calc(100% + 30px));
+            animation: toastIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .toast.hiding {
+            opacity: 0;
+            transform: translateX(calc(100% + 30px));
+        }
+        .toast .toast-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .toast .toast-body {
+            flex: 1;
+        }
+        .toast .toast-body strong {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #c9a84c;
+            margin-bottom: 2px;
+        }
+        .toast .toast-body p {
+            margin: 0;
+            line-height: 1.4;
+            color: #d0d8e0;
+            font-size: 0.85rem;
+        }
+        .toast .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+            transition: color 0.2s;
+            flex-shrink: 0;
+            margin-top: -2px;
+        }
+        .toast .toast-close:hover {
+            color: #fff;
+        }
+
+        /* Toast types */
+        .toast.success {
+            border-left-color: #55efc4;
+        }
+        .toast.success .toast-body strong {
+            color: #55efc4;
+        }
+        .toast.error {
+            border-left-color: #ff6b6b;
+        }
+        .toast.error .toast-body strong {
+            color: #ff6b6b;
+        }
+        .toast.warning {
+            border-left-color: #fdcb6e;
+        }
+        .toast.warning .toast-body strong {
+            color: #fdcb6e;
+        }
+        .toast.info {
+            border-left-color: #74b9ff;
+        }
+        .toast.info .toast-body strong {
+            color: #74b9ff;
+        }
+
+        @keyframes toastIn {
+            0% {
+                transform: translateX(calc(100% + 30px));
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ────────── MAIN LAYOUT ────────── */
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            margin: 12px 0 20px;
+        }
+        @media (max-width: 820px) {
+            .app-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .letterhead {
+                padding: 28px 24px;
+            }
+            .letterhead::after {
+                left: 24px;
+                right: 24px;
+            }
+            .letterhead-header {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .motto {
+                border-left: none;
+                padding-left: 0;
+                width: 100%;
+            }
+            .toast-container {
+                max-width: calc(100vw - 32px);
+                right: 16px;
+                top: 16px;
+            }
+        }
+
+        /* ────────── CARDS (paper inserts) ────────── */
+        .card-paper {
+            background: rgba(255, 252, 248, 0.6);
+            border: 1px solid rgba(201, 168, 76, 0.12);
+            padding: 20px 24px 24px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .card-paper:hover {
+            border-color: rgba(201, 168, 76, 0.25);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        }
+        .card-paper .card-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1a2a3a;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.3px;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+            padding-bottom: 10px;
+        }
+        .card-paper .card-title i {
+            color: #c9a84c;
+            font-size: 1.1rem;
+        }
+        .card-paper .card-title .badge-ats {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(201, 168, 76, 0.12);
+            color: #8a7a5a;
+            padding: 2px 10px;
+            margin-left: auto;
+            border: 1px solid rgba(201, 168, 76, 0.15);
+        }
+
+        /* ────────── INPUTS ────────── */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .input-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #5a6a7a;
+        }
+        .input-group .hint {
+            font-size: 0.75rem;
+            color: #8a9aaa;
+            margin-top: -4px;
+        }
+
+        .input-el {
+            font-family: 'Inter', sans-serif;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            color: #1a2a3a;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+            border-radius: 0;
+        }
+        .input-el:focus {
+            border-color: #c9a84c;
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08);
+        }
+        .input-el::placeholder {
+            color: #aab5c0;
+        }
+        textarea.input-el {
+            resize: vertical;
+            min-height: 80px;
+            font-family: 'Inter', sans-serif;
+        }
+        .input-el.file-drop {
+            padding: 28px 14px;
+            text-align: center;
+            border: 2px dashed rgba(201, 168, 76, 0.2);
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .input-el.file-drop:hover {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(201, 168, 76, 0.4);
+        }
+        .input-el.file-drop.dragover {
+            background: rgba(201, 168, 76, 0.05);
+            border-color: #c9a84c;
+        }
+        .input-el.file-drop input[type="file"] {
+            display: none;
+        }
+
+        /* ────────── BUTTONS ────────── */
+        .btn {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 10px 24px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            border-radius: 0;
+        }
+        .btn-primary {
+            background: #c9a84c;
+            color: #0a1f2b;
+        }
+        .btn-primary:hover {
+            background: #b8943a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(201, 168, 76, 0.25);
+        }
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(201, 168, 76, 0.3);
+            color: #5a4a3a;
+        }
+        .btn-outline:hover {
+            background: rgba(201, 168, 76, 0.04);
+            border-color: #c9a84c;
+        }
+
+        .btn-gold {
+            background: linear-gradient(145deg, #c9a84c, #b8943a);
+            color: #0a1f2b;
+            font-weight: 700;
+            padding: 12px 40px;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 12px rgba(201, 168, 76, 0.15);
+        }
+        .btn-gold:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(201, 168, 76, 0.25);
+        }
+        .btn-gold:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-sm {
+            padding: 6px 16px;
+            font-size: 0.75rem;
+        }
+
+        /* ────────── ACTION ROW ────────── */
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0 8px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(201, 168, 76, 0.08);
+        }
+
+        /* ────────── PREVIEW BOX ────────── */
+        .preview-box {
+            background: rgba(255, 255, 255, 0.3);
+            border-left: 3px solid #c9a84c;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #3a4a5a;
+            max-height: 100px;
+            overflow-y: auto;
+            border-radius: 0;
+            transition: all 0.2s;
+        }
+        .preview-box strong {
+            color: #1a2a3a;
+            font-weight: 600;
+        }
+        .preview-box .empty {
+            color: #8a9aaa;
+            font-style: italic;
+        }
+
+        /* ────────── COMPARISON / OUTPUT ────────── */
+        .output-section {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(201, 168, 76, 0.12);
+        }
+        .output-section .output-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #1a2a3a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .output-section .output-title i {
+            color: #c9a84c;
+        }
+
+        .output-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 14px;
+        }
+        @media (max-width: 640px) {
+            .output-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .output-card {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            padding: 16px 20px;
+        }
+        .output-card h5 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #3a4a5a;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            padding-bottom: 6px;
+        }
+        .output-card h5 i {
+            color: #c9a84c;
+            font-size: 0.85rem;
+        }
+        .output-card .content {
+            font-size: 0.85rem;
+            color: #2a3a4a;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            max-height: 260px;
+            overflow-y: auto;
+            font-family: 'Inter', monospace;
+            background: rgba(0, 0, 0, 0.01);
+            padding: 4px 2px;
+        }
+        .output-card .content .empty {
+            color: #8a9aaa;
+            font-style: italic;
+        }
+
+        .output-card .curify-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+
+        /* ────────── CUSTOM PROMPT ────────── */
+        .prompt-area {
+            background: rgba(201, 168, 76, 0.04);
+            padding: 14px 18px;
+            margin: 12px 0 4px;
+            border-left: 3px solid rgba(201, 168, 76, 0.2);
+        }
+        .prompt-area .form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .prompt-area .form-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #c9a84c;
+            border-radius: 0;
+        }
+        .prompt-area .form-check label {
+            font-size: 0.8rem;
+            color: #5a6a7a;
+        }
+        .prompt-area textarea {
+            font-family: 'Inter', sans-serif;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            color: #1a2a3a;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+            border-radius: 0;
+            resize: vertical;
+            min-height: 50px;
+        }
+        .prompt-area textarea:focus {
+            border-color: #c9a84c;
+        }
+        .prompt-area textarea.hidden {
+            display: none;
+        }
+
+        /* ────────── STATUS / LOADER ────────── */
+        .status-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #6a7a8a;
+            margin: 6px 0 4px;
+            min-height: 28px;
+        }
+        .status-line .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(201, 168, 76, 0.15);
+            border-top-color: #c9a84c;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .status-line .spinner.active {
+            display: inline-block;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ────────── FOOTER ────────── */
+        .letterhead-footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(201, 168, 76, 0.08);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.7rem;
+            color: #8a9aaa;
+            letter-spacing: 0.2px;
+        }
+        .letterhead-footer .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #5a6a7a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .letterhead-footer .footer-brand i {
+            color: #c9a84c;
+        }
+        .letterhead-footer .footer-links {
+            display: flex;
+            gap: 12px;
+        }
+        .letterhead-footer .footer-links a {
+            color: #8a9aaa;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .letterhead-footer .footer-links a:hover {
+            color: #c9a84c;
+        }
+
+        /* ────────── SCROLLBAR ────────── */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(201, 168, 76, 0.3);
+            border-radius: 0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c9a84c;
+        }
+
+        /* ────────── UTILITY ────────── */
+        .hidden {
+            display: none !important;
+        }
+        .text-muted {
+            color: #8a9aaa;
+        }
+        .text-gold {
+            color: #c9a84c;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .w-full {
+            width: 100%;
+        }
     </style>
 </head>
+
 <body>
 
-    <!-- ─── CANVAS ─── -->
-    <canvas id="ocean-canvas"></canvas>
-    <div class="rays-overlay"></div>
-    <div class="cursor-light" id="cursorLight"></div>
-    <div class="mermaid-float">🧜‍♀️</div>
+    <!-- ────────── TOAST CONTAINER ────────── -->
+    <div class="toast-container" id="toastContainer"></div>
 
-    <!-- ─── APP ─── -->
-    <div class="app-wrapper">
+    <!-- ────────── LETTERHEAD ────────── -->
+    <main class="letterhead" id="app">
 
         <!-- ─── HEADER ─── -->
-        <header class="app-header">
-            <a href="#" class="brand" onclick="showPage('home')">
-                <i class="fas fa-fish"></i> CurVina <span>— resume tailor</span>
-            </a>
-            <nav class="nav-links">
-                <button class="btn active" data-page="home" onclick="showPage('home')"><i class="fas fa-home"></i> Home</button>
-                <button class="btn" data-page="docs" onclick="showPage('docs')"><i class="fas fa-book"></i> Docs</button>
-                <button class="btn" data-page="about" onclick="showPage('about')"><i class="fas fa-user"></i> About</button>
-                <div class="toggle-wrap">
-                    <label><i class="fas fa-sun" style="color:#ffb347; font-size:0.9rem;"></i></label>
-                    <div class="toggle-switch" id="dayNightToggle" onclick="toggleDayNight()">
-                        <span class="icon-sun"><i class="fas fa-sun"></i></span>
-                        <span class="icon-moon"><i class="fas fa-moon"></i></span>
-                        <div class="thumb"></div>
-                    </div>
-                    <label><i class="fas fa-moon" style="color:#88ccff; font-size:0.9rem;"></i></label>
+        <header class="letterhead-header">
+            <div class="crest" aria-label="CurVina crest">
+                <i class="fas fa-fish" style="font-size:2.2rem;"></i>
+            </div>
+            <div class="letterhead-title">
+                <h1>Cur<span>Vina</span></h1>
+                <div class="sub">
+                    <i class="fas fa-water"></i>
+                    <span>Resume Intelligence · ATS‑Optimized</span>
+                    <i class="fas fa-water"></i>
                 </div>
-                <button class="btn" id="soundToggle" onclick="toggleSound()"><i class="fas fa-volume-up"></i></button>
-                <button class="btn" onclick="clearAll()"><i class="fas fa-trash-alt"></i></button>
-            </nav>
+            </div>
+            <div class="motto">
+                “swim the ocean of opportunities”
+            </div>
         </header>
 
-        <!-- ─── PAGE: HOME ─── -->
-        <div class="page active" id="page-home">
+        <!-- ─── MAIN GRID ─── -->
+        <div class="app-grid">
 
-            <!-- Input Row -->
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card-sharp">
-                        <div class="card-title"><i class="fas fa-briefcase"></i> Job Description</div>
-                        <div class="tab-group-sharp" id="jdTabs">
-                            <button class="tab-btn active" data-target="jdUrl"><i class="fas fa-link"></i> URL</button>
-                            <button class="tab-btn" data-target="jdPaste"><i class="fas fa-paste"></i> Paste</button>
-                            <button class="tab-btn" data-target="jdFile"><i class="fas fa-file"></i> File</button>
-                        </div>
-                        <div class="input-area">
-                            <div id="jdUrl" class="jd-input">
-                                <div class="d-flex gap-2">
-                                    <input type="url" id="jobUrlInput" class="input-sharp" placeholder="Paste job link (LinkedIn, Workday, etc.)" />
-                                    <button class="btn-primary-sharp" id="fetchJobBtn"><i class="fas fa-cloud-download-alt"></i> Fetch</button>
-                                </div>
-                            </div>
-                            <div id="jdPaste" class="jd-input hidden">
-                                <textarea id="jobPasteInput" class="input-sharp" rows="3" placeholder="Paste the full job description here..."></textarea>
-                            </div>
-                            <div id="jdFile" class="jd-input hidden">
-                                <div class="file-upload-sharp" id="jdFileUpload">
-                                    <i class="fas fa-upload"></i> Click to upload .txt, .docx, or .pdf
-                                    <input type="file" accept=".txt,.docx,.pdf" id="jobFileInput" />
-                                </div>
-                            </div>
-                            <div id="jdPreview" class="preview-box hidden">
-                                <strong>Job Preview</strong><br />
-                                <span id="jdPreviewText">No JD loaded yet.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card-sharp">
-                        <div class="card-title"><i class="fas fa-file-alt"></i> Your Resume</div>
-                        <div class="tab-group-sharp" id="resumeTabs">
-                            <button class="tab-btn active" data-target="resumeFile"><i class="fas fa-upload"></i> Upload</button>
-                            <button class="tab-btn" data-target="resumeLinkedin"><i class="fab fa-linkedin"></i> LinkedIn</button>
-                            <button class="tab-btn" data-target="resumeGist"><i class="fab fa-github"></i> Gist</button>
-                        </div>
-                        <div class="input-area">
-                            <div id="resumeFile" class="resume-input">
-                                <div class="file-upload-sharp" id="resumeFileUpload">
-                                    <i class="fas fa-file-pdf"></i> Upload PDF, DOCX, or TXT
-                                    <input type="file" accept=".pdf,.docx,.txt" id="resumeFileInput" />
-                                </div>
-                            </div>
-                            <div id="resumeLinkedin" class="resume-input hidden">
-                                <div class="d-flex gap-2">
-                                    <input type="url" id="linkedinInput" class="input-sharp" placeholder="https://linkedin.com/in/yourprofile" />
-                                    <button class="btn-primary-sharp" id="fetchLinkedinBtn"><i class="fab fa-linkedin"></i> Fetch</button>
-                                </div>
-                            </div>
-                            <div id="resumeGist" class="resume-input hidden">
-                                <div class="d-flex gap-2">
-                                    <input type="text" id="gistInput" class="input-sharp" placeholder="Gist ID or full URL" />
-                                    <button class="btn-primary-sharp" id="fetchGistBtn"><i class="fab fa-github"></i> Load</button>
-                                </div>
-                            </div>
-                            <div id="resumePreview" class="preview-box hidden">
-                                <strong>Resume Loaded</strong><br />
-                                <span id="resumePreviewText">No resume loaded.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="text-center mt-4 d-flex flex-wrap justify-content-center gap-3">
-                <button class="btn-demo-sharp" id="playDemoBtn" onclick="playDemo()">
-                    <i class="fas fa-play"></i> Play Demo
-                </button>
-                <button class="btn-tailor-sharp" id="tailorBtn" disabled>
-                    <i class="fas fa-magic"></i> Tailor Resume for This Job
-                </button>
-            </div>
-            <div class="loader" id="tailorLoader">
-                <i class="fas fa-fish"></i> CurVina is swimming through your resume...
-            </div>
-            <div id="demoStatus" class="text-center text-muted mt-2" style="font-size:0.9rem;"></div>
-
-            <!-- ─── COMPARISON & CURIFY PANEL ─── -->
-            <div id="comparisonPanel" class="comparison-panel hidden">
-                <div class="panel-title"><i class="fas fa-code-branch"></i> Resume Curifier & Comparison</div>
-
-                <!-- Custom Prompt -->
-                <div class="custom-prompt-area">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="customPromptToggle" style="border-radius:0; background:transparent; border-color:rgba(255,255,255,0.2);">
-                        <label class="form-check-label text-muted" for="customPromptToggle" style="font-size:0.85rem;">
-                            Enable Custom Prompt
-                        </label>
-                    </div>
-                    <textarea id="customPromptInput" class="hidden" rows="2" placeholder="e.g., 'Make it more concise', 'Focus on leadership skills', 'Use strong action verbs' ..."></textarea>
+            <!-- ─── COLUMN 1: JOB DESCRIPTION ─── -->
+            <section class="card-paper">
+                <div class="card-title">
+                    <i class="fas fa-briefcase"></i> Job Description
+                    <span class="badge-ats">JD</span>
                 </div>
 
-                <!-- 3 Columns -->
-                <div class="row g-4">
-                    <!-- Column 1: Job Requirements -->
-                    <div class="col-md-4">
-                        <div class="comparison-col">
-                            <h5><i class="fas fa-list-ul" style="color:#ffb347;"></i> Job Requirements</h5>
-                            <div id="jdRequirementsList">
-                                <p class="text-muted small">No job loaded yet.</p>
-                            </div>
-                        </div>
+                <div class="input-group">
+                    <label for="jdInput">Job URL <span class="text-muted">(LinkedIn, Workday, etc.)</span></label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="url" id="jdInput" class="input-el" placeholder="https://..." />
+                        <button class="btn btn-outline btn-sm" id="fetchJdBtn"><i class="fas fa-cloud-download-alt"></i> Fetch</button>
                     </div>
+                    <span class="hint">or paste the description below</span>
+                </div>
 
-                    <!-- Column 2: Your Current Resume -->
-                    <div class="col-md-4">
-                        <div class="comparison-col">
-                            <h5><i class="fas fa-user" style="color:#4fc3f7;"></i> Your Current Resume</h5>
-                            <div id="currentResumeList">
-                                <p class="text-muted small">No resume loaded yet.</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="input-group">
+                    <label for="jdPaste">Paste Job Description</label>
+                    <textarea id="jdPaste" class="input-el" rows="4" placeholder="Paste the full job description here..."></textarea>
+                </div>
 
-                    <!-- Column 3: Curified Suggestions -->
-                    <div class="col-md-4">
-                        <div class="comparison-col">
-                            <h5><i class="fas fa-wand-magic-sparkles" style="color:#55efc4;"></i> Curified Suggestions</h5>
-                            <div id="curifiedSuggestions">
-                                <p class="text-muted small">Load a JD and resume, then click a Curify button.</p>
-                            </div>
-                        </div>
+                <div class="input-group">
+                    <label for="jdFileInput">Or upload a file</label>
+                    <div class="input-el file-drop" id="jdFileDrop">
+                        <i class="fas fa-file-upload" style="font-size:1.2rem; color:#c9a84c;"></i>
+                        <span style="display:block; margin-top:4px;">Click to upload .txt, .docx, or .pdf</span>
+                        <input type="file" id="jdFileInput" accept=".txt,.docx,.pdf" />
                     </div>
                 </div>
-            </div>
+
+                <div id="jdPreview" class="preview-box hidden">
+                    <strong>Job Preview</strong><br />
+                    <span id="jdPreviewText">No JD loaded yet.</span>
+                </div>
+            </section>
+
+            <!-- ─── COLUMN 2: RESUME ─── -->
+            <section class="card-paper">
+                <div class="card-title">
+                    <i class="fas fa-file-alt"></i> Your Resume
+                    <span class="badge-ats">CV</span>
+                </div>
+
+                <div class="input-group">
+                    <label for="resumeFileInput">Upload your current resume</label>
+                    <div class="input-el file-drop" id="resumeFileDrop">
+                        <i class="fas fa-file-pdf" style="font-size:1.2rem; color:#c9a84c;"></i>
+                        <span style="display:block; margin-top:4px;">Click to upload PDF, DOCX, or TXT</span>
+                        <input type="file" id="resumeFileInput" accept=".pdf,.docx,.txt" />
+                    </div>
+                    <span class="hint">We'll extract and structure your experience automatically.</span>
+                </div>
+
+                <div class="input-group" style="margin-top:6px;">
+                    <label for="resumeGistInput">Or load from Gist (optional)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="resumeGistInput" class="input-el" placeholder="Gist ID or URL" />
+                        <button class="btn btn-outline btn-sm" id="loadGistBtn"><i class="fab fa-github"></i> Load</button>
+                    </div>
+                </div>
+
+                <div id="resumePreview" class="preview-box hidden">
+                    <strong>Resume Loaded</strong><br />
+                    <span id="resumePreviewText">No resume loaded.</span>
+                </div>
+            </section>
         </div>
 
-        <!-- ─── PAGE: TAILOR ─── -->
-        <div class="page" id="page-tailor">
-            <h3 class="fw-semibold mb-3"><i class="fas fa-cut"></i> Tailored Resume</h3>
-            <div class="editor-grid">
-                <div class="editor-card">
-                    <h4><i class="fas fa-history"></i> Original</h4>
-                    <div id="originalResumeDisplay" style="font-size:0.85rem; color:#b0d0e0; white-space:pre-wrap; font-family:monospace;"></div>
-                </div>
-                <div class="editor-card">
-                    <h4><i class="fas fa-wand-magic-sparkles"></i> Tailored (Editable)</h4>
-                    <div id="tailoredResumeEditor"></div>
-                </div>
-            </div>
-            <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
-                <button class="btn-primary-sharp" id="showDiffBtn"><i class="fas fa-code-branch"></i> Show Diff</button>
-                <button class="btn-primary-sharp" id="nextToExportBtn"><i class="fas fa-arrow-right"></i> Next: Export</button>
-            </div>
+        <!-- ─── ACTION ROW ─── -->
+        <div class="action-row">
+            <button class="btn btn-gold" id="tailorBtn" disabled>
+                <i class="fas fa-wand-magic-sparkles"></i> Tailor Resume
+            </button>
+            <button class="btn btn-outline" id="playDemoBtn">
+                <i class="fas fa-play"></i> Play Demo
+            </button>
+            <button class="btn btn-outline" id="clearBtn">
+                <i class="fas fa-trash-alt"></i> Clear
+            </button>
         </div>
 
-        <!-- ─── PAGE: EXPORT ─── -->
-        <div class="page" id="page-export">
-            <h3 class="fw-semibold mb-3"><i class="fas fa-file-export"></i> Export Your Tailored Resume</h3>
-            <p class="text-muted">Choose a format. Plain text is perfect for ATS systems like Workday.</p>
-            <div class="export-bar">
-                <button class="btn btn-outline-sharp" id="exportDocx"><i class="fas fa-file-word"></i> DOCX</button>
-                <button class="btn btn-outline-sharp" id="exportPdf"><i class="fas fa-file-pdf"></i> PDF</button>
-                <button class="btn btn-outline-sharp" id="exportHtml"><i class="fas fa-code"></i> HTML</button>
-                <button class="btn btn-outline-sharp" id="exportTxt"><i class="fas fa-file-alt"></i> TXT</button>
-                <button class="btn btn-primary-sharp" id="autoFillWorkday"><i class="fas fa-rocket"></i> Auto‑Fill Workday</button>
-            </div>
-            <div class="text-center mt-4 text-muted" style="font-size:0.85rem;">
-                <i class="fas fa-info-circle"></i> All data is stored locally in your browser.
-            </div>
+        <!-- ─── STATUS ─── -->
+        <div class="status-line" id="statusLine">
+            <span class="spinner" id="statusSpinner"></span>
+            <span id="statusText">Ready. Load a job and your resume to begin.</span>
         </div>
 
-        <!-- ─── PAGE: DOCS ─── -->
-        <div class="page" id="page-docs">
-            <div class="card-sharp">
-                <h2 class="fw-bold mb-4"><i class="fas fa-book-open"></i> Documentation</h2>
-                <div class="doc-section">
-                    <h4>🧜‍♀️ What is CurVina?</h4>
-                    <p>CurVina is an <strong>AI‑powered resume tailoring tool</strong> that helps job seekers customize their resumes for specific job descriptions. It uses <strong>Retrieval-Augmented Generation (RAG)</strong> to extract the most relevant skills and experiences from your existing resume and rewrite them to match the target job, increasing your chances of passing Applicant Tracking Systems (ATS).</p>
-                </div>
-                <div class="doc-section">
-                    <h4>⚙️ How It Works</h4>
-                    <ol>
-                        <li><strong>Input Job Description</strong> – Paste a job URL, text, or upload a file.</li>
-                        <li><strong>Upload Your Resume</strong> – Upload PDF, DOCX, TXT, or fetch from LinkedIn / Gist.</li>
-                        <li><strong>Curify</strong> – Use the comparison panel to selectively regenerate sections (Summary, Roles, Skills, Hobbies) based on the job description.</li>
-                        <li><strong>Edit &amp; Export</strong> – Fine‑tune the suggestions and export as DOCX, PDF, HTML, or plain text.</li>
-                    </ol>
-                </div>
-                <div class="doc-section">
-                    <h4>✨ Advantages</h4>
-                    <ul>
-                        <li><strong>ATS‑Optimized</strong> – Tailors content to include keywords from the job description.</li>
-                        <li><strong>Granular Control</strong> – Curify specific sections instead of the whole resume.</li>
-                        <li><strong>Time‑Saving</strong> – Automates the tedious process of customizing resumes for each application.</li>
-                        <li><strong>Privacy‑First</strong> – All processing happens locally in your browser (mock mode for demo).</li>
-                    </ul>
-                </div>
-                <div class="doc-section">
-                    <h4>🛠️ Tech Stack</h4>
-                    <div>
-                        <span class="badge-tech">HTML5</span>
-                        <span class="badge-tech">CSS3</span>
-                        <span class="badge-tech">JavaScript (ES6)</span>
-                        <span class="badge-tech">Bootstrap 5</span>
-                        <span class="badge-tech">Font Awesome</span>
-                        <span class="badge-tech">Canvas API</span>
-                        <span class="badge-tech">Web Audio API</span>
-                        <span class="badge-tech">RAGina.js (TF‑IDF)</span>
-                        <span class="badge-tech">Mock LLM (simulated)</span>
-                    </div>
-                </div>
-                <div class="doc-section">
-                    <h4>🚀 Future Roadmap</h4>
-                    <ul>
-                        <li>Real LLM integration (OpenAI, HuggingFace).</li>
-                        <li>Save resume to Gist, Google Drive.</li>
-                        <li>Auto‑fill Workday application forms.</li>
-                        <li>Support for more resume formats (ODT, RTF).</li>
-                    </ul>
-                </div>
+        <!-- ─── PROMPT AREA (custom instruction) ─── -->
+        <div class="prompt-area">
+            <div class="form-check">
+                <input type="checkbox" id="customPromptToggle" />
+                <label for="customPromptToggle"><i class="fas fa-pen-fancy"></i> Add custom instruction</label>
             </div>
+            <textarea id="customPromptInput" class="hidden" rows="2" placeholder="e.g. 'Make it more concise', 'Focus on leadership and team collaboration' ..."></textarea>
         </div>
 
-        <!-- ─── PAGE: ABOUT ─── -->
-        <div class="page" id="page-about">
-            <div class="card-sharp">
-                <div class="row g-4 align-items-center">
-                    <div class="col-md-3 text-center">
-                        <div class="about-avatar mx-auto">🧑‍💻</div>
-                        <h5 class="mt-3 fw-bold">suryasticsai</h5>
-                        <p class="text-muted small">Techno Agilist &amp; Dev Engineer</p>
-                    </div>
-                    <div class="col-md-9">
-                        <h4 class="fw-semibold">About the Author</h4>
-                        <p>I am a <strong>Techno Agilist</strong> and <strong>Dev Engineer</strong> &amp; <strong>Strategic Consultant</strong> with <strong>6+ years</strong> of experience at <strong>Tata Consultancy Services</strong>. I bridge the gap between development, Agile delivery, and business strategy — building tools that make people's lives easier.</p>
-                        <p class="text-muted small"><i class="fas fa-code"></i> Passionate about AI, automation, and crafting delightful experiences.</p>
-                        <div class="social-links d-flex flex-wrap gap-2 mt-3">
-                            <a href="mailto:suryasticsai@gmail.com" class="btn btn-outline-sharp" target="_blank"><i class="fas fa-envelope"></i> Gmail</a>
-                            <a href="https://github.com/suryasticsai" class="btn btn-outline-sharp" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-                            <a href="https://huggingface.co/suryasticsai" class="btn btn-outline-sharp" target="_blank"><i class="fas fa-brain"></i> HF</a>
-                            <a href="https://medium.com/@suryasticsai" class="btn btn-outline-sharp" target="_blank"><i class="fab fa-medium"></i> Medium</a>
-                            <a href="https://instagram.com/suryasticsai" class="btn btn-outline-sharp" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-                            <a href="https://linkedin.com/in/suryasticsai" class="btn btn-outline-sharp" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
-                        </div>
+        <!-- ─── OUTPUT SECTION ─── -->
+        <div class="output-section" id="outputSection">
+
+            <div class="output-title">
+                <i class="fas fa-code-branch"></i> Curified Resume
+                <span style="font-size:0.7rem; font-weight:400; font-family:'Inter',sans-serif; color:#8a9aaa; margin-left:8px;">
+                    (ATS‑friendly · editable)
+                </span>
+            </div>
+
+            <div class="output-grid" id="outputGrid">
+                <!-- Column: Original (read‑only) -->
+                <div class="output-card" id="originalCard">
+                    <h5><i class="fas fa-history"></i> Original</h5>
+                    <div class="content" id="originalContent">
+                        <span class="empty">No resume loaded yet.</span>
                     </div>
                 </div>
+
+                <!-- Column: Curified (editable) -->
+                <div class="output-card" id="curifiedCard">
+                    <h5><i class="fas fa-wand-magic-sparkles"></i> Curified <span style="font-size:0.65rem; font-weight:400; color:#8a9aaa;">(editable)</span></h5>
+                    <div class="content" id="curifiedContent">
+                        <span class="empty">Tailor your resume to see results.</span>
+                    </div>
+                    <div class="curify-actions">
+                        <button class="btn btn-sm btn-outline" id="curifySummaryBtn"><i class="fas fa-wand-magic-sparkles"></i> Summary</button>
+                        <button class="btn btn-sm btn-outline" id="curifyExperienceBtn"><i class="fas fa-wand-magic-sparkles"></i> Experience</button>
+                        <button class="btn btn-sm btn-outline" id="curifySkillsBtn"><i class="fas fa-wand-magic-sparkles"></i> Skills</button>
+                        <button class="btn btn-sm btn-outline" id="curifyAllBtn"><i class="fas fa-wand-magic-sparkles"></i> All</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── EXPORT ROW ─── -->
+            <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:18px; padding-top:14px; border-top:1px solid rgba(201,168,76,0.08);">
+                <button class="btn btn-sm btn-outline" id="exportTxtBtn"><i class="fas fa-file-alt"></i> TXT</button>
+                <button class="btn btn-sm btn-outline" id="exportHtmlBtn"><i class="fas fa-code"></i> HTML</button>
+                <button class="btn btn-sm btn-outline" id="exportDocxBtn"><i class="fas fa-file-word"></i> DOCX</button>
+                <button class="btn btn-sm btn-outline" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button class="btn btn-sm btn-primary" id="workdayBtn"><i class="fas fa-rocket"></i> Auto‑Fill Workday</button>
             </div>
         </div>
 
         <!-- ─── FOOTER ─── -->
-        <footer class="app-footer">
-            <a href="#" class="footer-brand" onclick="showPage('home')">
-                <i class="fas fa-fish"></i> CurVina
-                <span style="font-weight:300; color:#6a8f9e; font-size:0.8rem;">— swim the ocean of opportunities</span>
-            </a>
-            <div class="footer-social">
-                <a href="https://github.com/suryasticsai" class="btn" target="_blank"><i class="fab fa-github"></i></a>
-                <a href="https://linkedin.com/in/suryasticsai" class="btn" target="_blank"><i class="fab fa-linkedin"></i></a>
-                <a href="https://huggingface.co/suryasticsai" class="btn" target="_blank"><i class="fas fa-brain"></i></a>
-                <a href="https://medium.com/@suryasticsai" class="btn" target="_blank"><i class="fab fa-medium"></i></a>
-                <a href="mailto:suryasticsai@gmail.com" class="btn" target="_blank"><i class="fas fa-envelope"></i></a>
-            </div>
-            <div class="footer-copy">
-                &copy; 2026 CurVina &bull; Built with <i class="fas fa-heart" style="color:#ff6b6b;font-size:0.7rem;"></i> by suryasticsai
+        <footer class="letterhead-footer">
+            <span class="footer-brand">
+                <i class="fas fa-fish"></i> CurVina · <span style="font-weight:300; color:#8a9aaa;">Phase 0</span>
+            </span>
+            <span style="font-size:0.65rem; color:#aab5c0;">
+                Built with <i class="fas fa-heart" style="color:#c9a84c;font-size:0.6rem;"></i> by suryasticsai
+            </span>
+            <div class="footer-links">
+                <a href="#" onclick="showToast('info', '🐚 CurVina v0.1', 'Letterhead prototype – ready for testing.')">About</a>
+                <a href="https://github.com/suryasticsai" target="_blank">GitHub</a>
+                <a href="#" onclick="showToast('info', '🪸 Help', 'Upload a job description and your resume, then click Tailor.')">Help</a>
             </div>
         </footer>
-    </div>
 
+    </main>
+
+    <!-- ──────────────────────────────────────────────────────────
+    SCRIPT – All logic
+    ────────────────────────────────────────────────────────── -->
     <script>
         (function() {
             'use strict';
 
-            // ============================================================
-            //  CANVAS OCEAN ENGINE (unchanged for brevity, but functional)
-            // ============================================================
-            const canvas = document.getElementById('ocean-canvas');
-            const c = canvas.getContext('2d');
-            let W, H,
-                time = 0,
-                isNight = false;
+            // ================================================================
+            // 1. NOTIFICATION SYSTEM (Toast)
+            // ================================================================
+            const toastContainer = document.getElementById('toastContainer');
 
-            const waves = [];
-            for (let i = 0; i < 5; i++) {
-                waves.push({
-                    amplitude: 15 + Math.random() * 20,
-                    frequency: 0.003 + Math.random() * 0.005,
-                    speed: 0.01 + Math.random() * 0.02,
-                    phase: Math.random() * Math.PI * 2,
-                    yOffset: 0.6 + i * 0.08,
-                    opacity: 0.1 + i * 0.05
-                });
-            }
-            const bubbles = [];
-            const maxBubbles = 60;
-            const fishes = [];
-            for (let i = 0; i < 8; i++) {
-                fishes.push({
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight * 0.7,
-                    size: 8 + Math.random() * 12,
-                    speed: 0.3 + Math.random() * 0.7,
-                    direction: Math.random() > 0.5 ? 1 : -1,
-                    wobble: Math.random() * Math.PI * 2,
-                    wobbleSpeed: 0.02 + Math.random() * 0.03,
-                    color: 'hsl(' + (180 + Math.random() * 40) + ', 70%, ' + (50 + Math.random() * 30) + '%)',
-                    tailPhase: Math.random() * Math.PI * 2
-                });
-            }
-            const jellyfish = [];
-            for (let i = 0; i < 3; i++) {
-                const j = {
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight * 0.5,
-                    size: 20 + Math.random() * 15,
-                    speed: 0.2 + Math.random() * 0.3,
-                    phase: Math.random() * Math.PI * 2,
-                    tentacles: []
+            window.showToast = function(type, title, message, duration) {
+                duration = duration || 4000;
+                const icons = {
+                    success: '🐟',
+                    error: '🪼',
+                    warning: '🐚',
+                    info: '🐠'
                 };
-                for (let t = 0; t < 6; t++) {
-                    j.tentacles.push({ offset: (t - 2.5) * 3, length: 30 + Math.random() * 20, phase: Math.random() * Math.PI *
-                            2 });
-                }
-                jellyfish.push(j);
-            }
-            const caustics = [];
-            for (let i = 0; i < 15; i++) {
-                caustics.push({
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight,
-                    size: 50 + Math.random() * 100,
-                    phase: Math.random() * Math.PI * 2,
-                    speed: 0.005 + Math.random() * 0.01
+                const icon = icons[type] || '🐠';
+
+                const toast = document.createElement('div');
+                toast.className = 'toast ' + type;
+                toast.innerHTML = `
+                            <div class="toast-icon">${icon}</div>
+                            <div class="toast-body">
+                                <strong>${title || 'CurVina'}</strong>
+                                <p>${message || ''}</p>
+                            </div>
+                            <button class="toast-close" aria-label="Dismiss">&times;</button>
+                        `;
+                toastContainer.appendChild(toast);
+
+                // Dismiss on close click
+                toast.querySelector('.toast-close').addEventListener('click', function() {
+                    dismissToast(toast);
                 });
-            }
 
-            function resize() {
-                W = canvas.width = window.innerWidth;
-                H = canvas.height = window.innerHeight;
-            }
-            window.addEventListener('resize', resize);
-            resize();
+                // Auto dismiss
+                const timer = setTimeout(function() {
+                    dismissToast(toast);
+                }, duration);
 
-            function drawGradient() {
-                const grad = c.createLinearGradient(0, 0, 0, H);
-                if (!isNight) {
-                    grad.addColorStop(0, '#0a2f44');
-                    grad.addColorStop(0.3, '#1b5a7a');
-                    grad.addColorStop(0.6, '#2d8ba8');
-                    grad.addColorStop(1, '#5fc3d9');
-                } else {
-                    grad.addColorStop(0, '#020b10');
-                    grad.addColorStop(0.3, '#061a24');
-                    grad.addColorStop(0.6, '#0c2d3a');
-                    grad.addColorStop(1, '#1a4a5a');
-                }
-                c.fillStyle = grad;
-                c.fillRect(0, 0, W, H);
-            }
-
-            function drawCaustics() {
-                caustics.forEach(function(caustic) {
-                    caustic.phase += caustic.speed;
-                    const pulse = Math.sin(caustic.phase) * 0.5 + 0.5;
-                    const alpha = isNight ? 0.015 * pulse : 0.03 * pulse;
-                    c.beginPath();
-                    c.ellipse(caustic.x, caustic.y, caustic.size * (0.8 + pulse * 0.4), caustic.size * 0.3, caustic.phase *
-                        0.5, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(255, 255, 220, ' + alpha + ')';
-                    c.fill();
+                // Pause auto-dismiss on hover
+                toast.addEventListener('mouseenter', function() {
+                    clearTimeout(timer);
                 });
-            }
-
-            function drawWaves() {
-                waves.forEach(function(wave, idx) {
-                    wave.phase += wave.speed;
-                    c.beginPath();
-                    c.moveTo(0, H);
-                    for (let x = 0; x <= W; x += 3) {
-                        const y = H * wave.yOffset +
-                            Math.sin(x * wave.frequency + wave.phase) * wave.amplitude +
-                            Math.sin(x * wave.frequency * 2.3 + wave.phase * 1.5) * wave.amplitude * 0.3;
-                        c.lineTo(x, y);
-                    }
-                    c.lineTo(W, H);
-                    c.closePath();
-                    const alpha = isNight ? wave.opacity * 0.3 : wave.opacity;
-                    c.fillStyle = 'rgba(0, ' + (100 + idx * 30) + ', ' + (150 + idx * 20) + ', ' + alpha + ')';
-                    c.fill();
+                toast.addEventListener('mouseleave', function() {
+                    setTimeout(function() {
+                        dismissToast(toast);
+                    }, 1500);
                 });
-            }
 
-            function drawBubbles() {
-                if (bubbles.length < maxBubbles && Math.random() < 0.05) {
-                    bubbles.push({
-                        x: Math.random() * W,
-                        y: H + 20,
-                        size: 2 + Math.random() * 6,
-                        speed: 0.5 + Math.random() * 1.5,
-                        wobble: Math.random() * Math.PI * 2,
-                        wobbleSpeed: 0.02 + Math.random() * 0.03,
-                        opacity: 0.2 + Math.random() * 0.3
-                    });
-                }
-                for (let i = bubbles.length - 1; i >= 0; i--) {
-                    const b = bubbles[i];
-                    b.y -= b.speed;
-                    b.wobble += b.wobbleSpeed;
-                    b.x += Math.sin(b.wobble) * 0.5;
-                    b.opacity -= 0.0005;
-                    if (b.y < -20 || b.opacity <= 0) { bubbles.splice(i, 1); continue; }
-                    c.beginPath();
-                    c.arc(b.x, b.y, b.size, 0, Math.PI * 2);
-                    const grad = c.createRadialGradient(b.x - b.size * 0.3, b.y - b.size * 0.3, 0, b.x, b.y, b.size);
-                    grad.addColorStop(0, 'rgba(255, 255, 255, ' + (b.opacity * 0.8) + ')');
-                    grad.addColorStop(0.5, 'rgba(200, 240, 255, ' + (b.opacity * 0.4) + ')');
-                    grad.addColorStop(1, 'rgba(200, 240, 255, 0)');
-                    c.fillStyle = grad;
-                    c.fill();
-                    c.beginPath();
-                    c.arc(b.x - b.size * 0.3, b.y - b.size * 0.3, b.size * 0.2, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(255, 255, 255, ' + (b.opacity * 0.6) + ')';
-                    c.fill();
-                }
-            }
-
-            function drawFish() {
-                fishes.forEach(function(f) {
-                    f.x += f.speed * f.direction;
-                    f.wobble += f.wobbleSpeed;
-                    f.y += Math.sin(f.wobble) * 0.3;
-                    f.tailPhase += 0.15;
-                    if (f.direction > 0 && f.x > W + 50) f.x = -50;
-                    if (f.direction < 0 && f.x < -50) f.x = W + 50;
-                    c.save();
-                    c.translate(f.x, f.y);
-                    c.scale(f.direction, 1);
-                    c.beginPath();
-                    c.ellipse(0, 0, f.size, f.size * 0.4, 0, 0, Math.PI * 2);
-                    c.fillStyle = f.color;
-                    c.fill();
-                    const tailWag = Math.sin(f.tailPhase) * 5;
-                    c.beginPath();
-                    c.moveTo(-f.size * 0.8, 0);
-                    c.lineTo(-f.size * 1.5, -f.size * 0.4 + tailWag * 0.3);
-                    c.lineTo(-f.size * 1.5, f.size * 0.4 + tailWag * 0.3);
-                    c.closePath();
-                    c.fillStyle = f.color;
-                    c.fill();
-                    c.beginPath();
-                    c.arc(f.size * 0.4, -f.size * 0.1, f.size * 0.12, 0, Math.PI * 2);
-                    c.fillStyle = 'white';
-                    c.fill();
-                    c.beginPath();
-                    c.arc(f.size * 0.45, -f.size * 0.1, f.size * 0.06, 0, Math.PI * 2);
-                    c.fillStyle = 'black';
-                    c.fill();
-                    c.restore();
-                });
-            }
-
-            function drawJellyfish() {
-                jellyfish.forEach(function(j) {
-                    j.phase += 0.02;
-                    j.y += Math.sin(j.phase) * 0.3;
-                    j.x += Math.sin(j.phase * 0.5) * 0.2;
-                    c.save();
-                    c.translate(j.x, j.y);
-                    const pulse = Math.sin(j.phase) * 0.15 + 1;
-                    if (isNight) { c.shadowColor = 'rgba(100, 200, 255, 0.5)';
-                        c.shadowBlur = 30; }
-                    c.beginPath();
-                    c.ellipse(0, 0, j.size * pulse, j.size * 0.6 * pulse, 0, Math.PI, 0);
-                    c.fillStyle = isNight ? 'rgba(150, 220, 255, 0.25)' : 'rgba(255, 200, 220, 0.2)';
-                    c.fill();
-                    c.beginPath();
-                    c.ellipse(0, -j.size * 0.1, j.size * 0.6 * pulse, j.size * 0.35 * pulse, 0, Math.PI, 0);
-                    c.fillStyle = isNight ? 'rgba(200, 240, 255, 0.15)' : 'rgba(255, 220, 230, 0.1)';
-                    c.fill();
-                    c.shadowBlur = 0;
-                    j.tentacles.forEach(function(t) {
-                        c.beginPath();
-                        c.moveTo(t.offset, j.size * 0.3);
-                        for (let i = 0; i < t.length; i += 3) {
-                            const tx = t.offset + Math.sin(j.phase * 2 + t.phase + i * 0.1) * (3 + i * 0.1);
-                            const ty = j.size * 0.3 + i;
-                            c.lineTo(tx, ty);
-                        }
-                        c.strokeStyle = isNight ? 'rgba(150, 220, 255, ' + (0.15 + Math.sin(j.phase) * 0.05) + ')' :
-                            'rgba(255, 200, 220, ' + (0.1 + Math.sin(j.phase) * 0.03) + ')';
-                        c.lineWidth = 1;
-                        c.stroke();
-                    });
-                    c.restore();
-                });
-            }
-
-            function drawSand() {
-                const sandY = H - 30;
-                const grad = c.createLinearGradient(0, sandY, 0, H);
-                grad.addColorStop(0, 'rgba(194, 166, 122, 0.2)');
-                grad.addColorStop(1, 'rgba(194, 166, 122, 0.35)');
-                c.fillStyle = grad;
-                c.fillRect(0, sandY, W, 30);
-                for (let i = 0; i < W; i += 4) {
-                    const noise = Math.sin(i * 0.1 + time * 0.01) * 2;
-                    c.fillStyle = 'rgba(212, 184, 150, ' + (0.1 + Math.random() * 0.1) + ')';
-                    c.fillRect(i, sandY + 5 + noise, 2, 2);
-                }
-            }
-
-            function drawSeaweed() {
-                const seaweeds = [
-                    { x: W * 0.05, height: 80, width: 8, speed: 0.02, phase: 0 },
-                    { x: W * 0.12, height: 60, width: 6, speed: 0.025, phase: 1 },
-                    { x: W * 0.88, height: 100, width: 10, speed: 0.018, phase: 2 },
-                    { x: W * 0.95, height: 70, width: 7, speed: 0.022, phase: 3 },
-                    { x: W * 0.2, height: 50, width: 5, speed: 0.03, phase: 4 },
-                    { x: W * 0.8, height: 55, width: 6, speed: 0.028, phase: 5 }
-                ];
-                seaweeds.forEach(function(s) {
-                    s.phase += s.speed;
-                    const sway = Math.sin(s.phase) * 15;
-                    c.beginPath();
-                    c.moveTo(s.x, H);
-                    c.quadraticCurveTo(s.x + sway * 0.5, H - s.height * 0.5, s.x + sway, H - s.height);
-                    c.strokeStyle = isNight ? 'rgba(10, 122, 90, 0.25)' : 'rgba(10, 122, 90, 0.4)';
-                    c.lineWidth = s.width;
-                    c.lineCap = 'round';
-                    c.stroke();
-                    for (let i = 0; i < 3; i++) {
-                        const leafY = H - s.height * (0.3 + i * 0.25);
-                        const leafSway = Math.sin(s.phase + i) * 8;
-                        c.beginPath();
-                        c.ellipse(s.x + leafSway, leafY, 6, 12, leafSway * 0.05, 0, Math.PI * 2);
-                        c.fillStyle = isNight ? 'rgba(26, 154, 122, 0.15)' : 'rgba(26, 154, 122, 0.25)';
-                        c.fill();
-                    }
-                });
-            }
-
-            function drawBioluminescence() {
-                if (!isNight) return;
-                for (let i = 0; i < 20; i++) {
-                    const x = Math.random() * W;
-                    const y = Math.random() * H * 0.8;
-                    const size = Math.random() * 2;
-                    const alpha = Math.random() * 0.5;
-                    c.beginPath();
-                    c.arc(x, y, size, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(100, 220, 255, ' + alpha + ')';
-                    c.shadowColor = 'rgba(100, 220, 255, 0.5)';
-                    c.shadowBlur = 10;
-                    c.fill();
-                    c.shadowBlur = 0;
-                }
-            }
-
-            function animate() {
-                time++;
-                c.clearRect(0, 0, W, H);
-                drawGradient();
-                drawCaustics();
-                drawBioluminescence();
-                drawFish();
-                drawJellyfish();
-                drawBubbles();
-                drawWaves();
-                drawSeaweed();
-                drawSand();
-                requestAnimationFrame(animate);
-            }
-            animate();
-
-            // ============================================================
-            //  INTERACTIVE BUBBLES & SOUND (unchanged)
-            // ============================================================
-            function spawnBubbleBurst(x, y, count) {
-                count = count || 8;
-                for (let i = 0; i < count; i++) {
-                    const size = 3 + Math.random() * 8;
-                    const el = document.createElement('div');
-                    el.className = 'bubble-particle';
-                    el.style.left = x + 'px';
-                    el.style.top = y + 'px';
-                    el.style.width = size + 'px';
-                    el.style.height = size + 'px';
-                    el.style.setProperty('--duration', (1 + Math.random() * 1.5) + 's');
-                    el.style.setProperty('--rise', (80 + Math.random() * 150) + 'px');
-                    el.style.setProperty('--start-opacity', (0.4 + Math.random() * 0.4));
-                    el.style.setProperty('--peak-opacity', (0.6 + Math.random() * 0.3));
-                    el.style.background = 'radial-gradient(circle at 30% 30%, rgba(255,255,255,' + (0.5 + Math.random() *
-                        0.3) + '), rgba(200,240,255,' + (0.2 + Math.random() * 0.2) + '))';
-                    el.style.boxShadow = '0 0 ' + (size * 2) + 'px rgba(200,240,255,0.3)';
-                    document.body.appendChild(el);
-                    setTimeout(function() { el.remove(); }, 2500);
-                }
-            }
-
-            function spawnRipple(x, y) {
-                const ripple = document.createElement('div');
-                ripple.className = 'ripple';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                document.body.appendChild(ripple);
-                setTimeout(function() { ripple.remove(); }, 1200);
-            }
-
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('button, input, textarea, a, .toggle-switch, .file-upload-sharp')) return;
-                spawnBubbleBurst(e.clientX, e.clientY, 10);
-                spawnRipple(e.clientX, e.clientY);
-                SoundFX.bubbleBurst();
-                if (navigator.vibrate) navigator.vibrate([30, 50, 20]);
-            });
-
-            document.addEventListener('touchstart', function(e) {
-                if (e.target.closest('button, input, textarea, a, .toggle-switch, .file-upload-sharp')) return;
-                for (let i = 0; i < e.touches.length; i++) {
-                    const t = e.touches[i];
-                    spawnBubbleBurst(t.clientX, t.clientY, 6);
-                    spawnRipple(t.clientX, t.clientY);
-                }
-                SoundFX.bubbleBurst();
-                if (navigator.vibrate) navigator.vibrate([20, 40, 15]);
-            });
-
-            const cursorLight = document.getElementById('cursorLight');
-            document.addEventListener('mousemove', function(e) {
-                cursorLight.style.left = e.clientX + 'px';
-                cursorLight.style.top = e.clientY + 'px';
-            });
-
-            // ============================================================
-            //  SOUND ENGINE (unchanged)
-            // ============================================================
-            const SoundFX = {
-                ctx: null,
-                enabled: true,
-                init: function() {
-                    this.ctx = new(window.AudioContext || window.webkitAudioContext)();
-                    const resume = function() { if (SoundFX.ctx.state === 'suspended') SoundFX.ctx.resume(); };
-                    document.addEventListener('click', resume, { once: false });
-                },
-                pop: function(volume, pitch) {
-                    volume = volume || 0.10;
-                    pitch = pitch || 700;
-                    if (!this.enabled || !this.ctx) return;
-                    try {
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(pitch, this.ctx.currentTime);
-                        osc.frequency.exponentialRampToValueAtTime(pitch * 1.6, this.ctx.currentTime + 0.04);
-                        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.07);
-                        osc.connect(gain);
-                        gain.connect(this.ctx.destination);
-                        osc.start();
-                        osc.stop(this.ctx.currentTime + 0.07);
-                    } catch (e) {}
-                },
-                splash: function(volume) {
-                    volume = volume || 0.10;
-                    if (!this.enabled || !this.ctx) return;
-                    try {
-                        const bufferSize = this.ctx.sampleRate * 0.12;
-                        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                        const data = buffer.getChannelData(0);
-                        for (let i = 0; i < bufferSize; i++) {
-                            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
-                        }
-                        const noise = this.ctx.createBufferSource();
-                        noise.buffer = buffer;
-                        const gain = this.ctx.createGain();
-                        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
-                        noise.connect(gain);
-                        gain.connect(this.ctx.destination);
-                        noise.start();
-                        noise.stop(this.ctx.currentTime + 0.12);
-                    } catch (e) {}
-                },
-                giggle: function(volume) {
-                    volume = volume || 0.08;
-                    if (!this.enabled || !this.ctx) return;
-                    try {
-                        const notes = [523, 659, 784, 1047];
-                        notes.forEach(function(freq, i) {
-                            const osc = SoundFX.ctx.createOscillator();
-                            const gain = SoundFX.ctx.createGain();
-                            osc.type = 'sine';
-                            osc.frequency.setValueAtTime(freq, SoundFX.ctx.currentTime + i * 0.06);
-                            gain.gain.setValueAtTime(volume * 0.5, SoundFX.ctx.currentTime + i * 0.06);
-                            gain.gain.exponentialRampToValueAtTime(0.001, SoundFX.ctx.currentTime + i * 0.06 + 0.1);
-                            osc.connect(gain);
-                            gain.connect(SoundFX.ctx.destination);
-                            osc.start(SoundFX.ctx.currentTime + i * 0.06);
-                            osc.stop(SoundFX.ctx.currentTime + i * 0.06 + 0.1);
-                        });
-                    } catch (e) {}
-                },
-                error: function(volume) {
-                    volume = volume || 0.12;
-                    if (!this.enabled || !this.ctx) return;
-                    try {
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(200, this.ctx.currentTime);
-                        osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.2);
-                        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
-                        osc.connect(gain);
-                        gain.connect(this.ctx.destination);
-                        osc.start();
-                        osc.stop(this.ctx.currentTime + 0.25);
-                    } catch (e) {}
-                },
-                bubbleBurst: function() {
-                    if (!this.enabled || !this.ctx) return;
-                    try {
-                        const now = this.ctx.currentTime;
-                        for (let i = 0; i < 5; i++) {
-                            const osc = this.ctx.createOscillator();
-                            const gain = this.ctx.createGain();
-                            const filter = this.ctx.createBiquadFilter();
-                            osc.type = 'sine';
-                            const baseFreq = 400 + Math.random() * 600;
-                            osc.frequency.setValueAtTime(baseFreq, now + i * 0.03);
-                            osc.frequency.exponentialRampToValueAtTime(baseFreq * 2.5, now + i * 0.03 + 0.06);
-                            filter.type = 'bandpass';
-                            filter.frequency.setValueAtTime(baseFreq, now + i * 0.03);
-                            filter.Q.setValueAtTime(5, now + i * 0.03);
-                            gain.gain.setValueAtTime(0.06 + Math.random() * 0.04, now + i * 0.03);
-                            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.03 + 0.08);
-                            osc.connect(filter);
-                            filter.connect(gain);
-                            gain.connect(this.ctx.destination);
-                            osc.start(now + i * 0.03);
-                            osc.stop(now + i * 0.03 + 0.08);
-                        }
-                        const splashBufferSize = this.ctx.sampleRate * 0.08;
-                        const splashBuffer = this.ctx.createBuffer(1, splashBufferSize, this.ctx.sampleRate);
-                        const splashData = splashBuffer.getChannelData(0);
-                        for (let i = 0; i < splashBufferSize; i++) {
-                            splashData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (splashBufferSize * 0.2)) * 0.3;
-                        }
-                        const splashNoise = this.ctx.createBufferSource();
-                        splashNoise.buffer = splashBuffer;
-                        const splashGain = this.ctx.createGain();
-                        splashGain.gain.setValueAtTime(0.05, now);
-                        splashGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-                        splashNoise.connect(splashGain);
-                        splashGain.connect(this.ctx.destination);
-                        splashNoise.start(now);
-                        splashNoise.stop(now + 0.1);
-                    } catch (e) {}
-                }
+                return toast;
             };
 
-            // ============================================================
-            //  STATE & DOM REFS
-            // ============================================================
+            function dismissToast(toast) {
+                if (toast.classList.contains('hiding')) return;
+                toast.classList.add('hiding');
+                setTimeout(function() {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 400);
+            }
+
+            // ================================================================
+            // 2. STATE
+            // ================================================================
             const state = {
-                jobDescription: null,
-                originalResume: null,
-                tailoredResume: null,
-                curifiedSuggestions: { summary: '', experience: [], skills: '', hobbies: '', additional: '' },
-                step: 1,
-                isNight: false,
+                jobDescription: null, // { company, title, description, requirements }
+                originalResume: null, // structured JSON from RAGina
+                tailoredResume: null, // after curification
+                isProcessing: false,
+                engine: null, // RAGina engine instance
             };
 
+            // ================================================================
+            // 3. DOM REFS
+            // ================================================================
             const $ = function(sel) { return document.querySelector(sel); };
             const $$ = function(sel) { return document.querySelectorAll(sel); };
 
-            const pageHome = document.getElementById('page-home');
-            const pageTailor = document.getElementById('page-tailor');
-            const pageExport = document.getElementById('page-export');
-            const pageDocs = document.getElementById('page-docs');
-            const pageAbout = document.getElementById('page-about');
-            const navBtns = document.querySelectorAll('.nav-links .btn[data-page]');
+            const jdInput = $('#jdInput');
+            const jdPaste = $('#jdPaste');
+            const jdFileInput = $('#jdFileInput');
+            const jdFileDrop = $('#jdFileDrop');
+            const fetchJdBtn = $('#fetchJdBtn');
+            const jdPreview = $('#jdPreview');
+            const jdPreviewText = $('#jdPreviewText');
 
-            const jdTabs = $$('#jdTabs .tab-btn');
-            const jdInputs = {
-                url: document.getElementById('jdUrl'),
-                paste: document.getElementById('jdPaste'),
-                file: document.getElementById('jdFile'),
-            };
-            const jdPreview = document.getElementById('jdPreview');
-            const jdPreviewText = document.getElementById('jdPreviewText');
-            const jobUrlInput = document.getElementById('jobUrlInput');
-            const jobPasteInput = document.getElementById('jobPasteInput');
-            const jobFileInput = document.getElementById('jobFileInput');
-            const fetchJobBtn = document.getElementById('fetchJobBtn');
+            const resumeFileInput = $('#resumeFileInput');
+            const resumeFileDrop = $('#resumeFileDrop');
+            const resumeGistInput = $('#resumeGistInput');
+            const loadGistBtn = $('#loadGistBtn');
+            const resumePreview = $('#resumePreview');
+            const resumePreviewText = $('#resumePreviewText');
 
-            const resumeTabs = $$('#resumeTabs .tab-btn');
-            const resumeInputs = {
-                file: document.getElementById('resumeFile'),
-                linkedin: document.getElementById('resumeLinkedin'),
-                gist: document.getElementById('resumeGist'),
-            };
-            const resumePreview = document.getElementById('resumePreview');
-            const resumePreviewText = document.getElementById('resumePreviewText');
-            const resumeFileInput = document.getElementById('resumeFileInput');
-            const linkedinInput = document.getElementById('linkedinInput');
-            const gistInput = document.getElementById('gistInput');
-            const fetchLinkedinBtn = document.getElementById('fetchLinkedinBtn');
-            const fetchGistBtn = document.getElementById('fetchGistBtn');
+            const tailorBtn = $('#tailorBtn');
+            const playDemoBtn = $('#playDemoBtn');
+            const clearBtn = $('#clearBtn');
 
-            const tailorBtn = document.getElementById('tailorBtn');
-            const tailorLoader = document.getElementById('tailorLoader');
-            const originalDisplay = document.getElementById('originalResumeDisplay');
-            const tailoredEditor = document.getElementById('tailoredResumeEditor');
-            const nextToExportBtn = document.getElementById('nextToExportBtn');
+            const statusText = $('#statusText');
+            const statusSpinner = $('#statusSpinner');
 
-            const exportDocx = document.getElementById('exportDocx');
-            const exportPdf = document.getElementById('exportPdf');
-            const exportHtml = document.getElementById('exportHtml');
-            const exportTxt = document.getElementById('exportTxt');
-            const autoFillWorkday = document.getElementById('autoFillWorkday');
+            const customPromptToggle = $('#customPromptToggle');
+            const customPromptInput = $('#customPromptInput');
 
-            const soundToggle = document.getElementById('soundToggle');
-            const dayNightToggle = document.getElementById('dayNightToggle');
-            const playDemoBtn = document.getElementById('playDemoBtn');
-            const demoStatus = document.getElementById('demoStatus');
+            const originalContent = $('#originalContent');
+            const curifiedContent = $('#curifiedContent');
 
-            const comparisonPanel = document.getElementById('comparisonPanel');
-            const jdRequirementsList = document.getElementById('jdRequirementsList');
-            const currentResumeList = document.getElementById('currentResumeList');
-            const curifiedSuggestions = document.getElementById('curifiedSuggestions');
+            const curifySummaryBtn = $('#curifySummaryBtn');
+            const curifyExperienceBtn = $('#curifyExperienceBtn');
+            const curifySkillsBtn = $('#curifySkillsBtn');
+            const curifyAllBtn = $('#curifyAllBtn');
 
-            const customPromptToggle = document.getElementById('customPromptToggle');
-            const customPromptInput = document.getElementById('customPromptInput');
+            const exportTxtBtn = $('#exportTxtBtn');
+            const exportHtmlBtn = $('#exportHtmlBtn');
+            const exportDocxBtn = $('#exportDocxBtn');
+            const exportPdfBtn = $('#exportPdfBtn');
+            const workdayBtn = $('#workdayBtn');
 
-            // ─── PAGE NAVIGATION ─────────────────────────────────────────
-            window.showPage = function(page) {
-                document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-                const target = document.getElementById('page-' + page);
-                if (target) target.classList.add('active');
-                navBtns.forEach(function(btn) {
-                    btn.classList.toggle('active', btn.dataset.page === page);
-                });
-                if (page === 'tailor' && state.tailoredResume) {
-                    renderTailoredView();
+            // ================================================================
+            // 4. RAGina ENGINE INIT
+            // ================================================================
+            function initEngine() {
+                if (!window.RAGina) {
+                    showToast('error', '🪼 RAGina not loaded', 'Please check your internet connection and reload.');
+                    return false;
                 }
-                SoundFX.pop(0.05, 500);
-            };
+                try {
+                    state.engine = new RAGEngine();
+                    return true;
+                } catch (e) {
+                    showToast('error', '🪼 Engine error', e.message);
+                    return false;
+                }
+            }
 
-            // ─── DAY / NIGHT TOGGLE ──────────────────────────────────────
-            window.toggleDayNight = function() {
-                state.isNight = !state.isNight;
-                isNight = state.isNight;
-                document.body.classList.toggle('night-mode', state.isNight);
-                dayNightToggle.classList.toggle('active', state.isNight);
-                SoundFX.splash(0.08);
-            };
-
-            // ─── SOUND TOGGLE ────────────────────────────────────────────
-            window.toggleSound = function() {
-                SoundFX.enabled = !SoundFX.enabled;
-                soundToggle.innerHTML = SoundFX.enabled ? '<i class="fas fa-volume-up"></i>' :
-                    '<i class="fas fa-volume-mute"></i>';
-                SoundFX.pop(0.06, 600);
-            };
-
-            const initAudio = function() {
-                if (!SoundFX.ctx) SoundFX.init();
-                document.removeEventListener('click', initAudio);
-            };
-            document.addEventListener('click', initAudio, { once: true });
-
-            // ─── CUSTOM PROMPT TOGGLE ────────────────────────────────────
-            customPromptToggle.addEventListener('change', function() {
-                if (this.checked) {
-                    customPromptInput.classList.remove('hidden');
+            // ================================================================
+            // 5. UTILITY FUNCTIONS
+            // ================================================================
+            function setStatus(msg, loading) {
+                statusText.textContent = msg;
+                if (loading) {
+                    statusSpinner.classList.add('active');
                 } else {
-                    customPromptInput.classList.add('hidden');
+                    statusSpinner.classList.remove('active');
                 }
-            });
+            }
 
-            // ─── CLEAR ALL ────────────────────────────────────────────────
-            window.clearAll = function() {
-                if (confirm('Clear all data? This cannot be undone.')) {
-                    SoundFX.splash(0.08);
-                    state.jobDescription = null;
-                    state.originalResume = null;
-                    state.tailoredResume = null;
-                    state.curifiedSuggestions = { summary: '', experience: [], skills: '', hobbies: '', additional: '' };
-                    jdPreview.classList.add('hidden');
-                    resumePreview.classList.add('hidden');
-                    jobUrlInput.value = '';
-                    jobPasteInput.value = '';
-                    jobFileInput.value = '';
-                    linkedinInput.value = '';
-                    gistInput.value = '';
-                    resumeFileInput.value = '';
-                    originalDisplay.textContent = '';
-                    tailoredEditor.innerHTML = '';
-                    comparisonPanel.classList.add('hidden');
-                    demoStatus.textContent = '';
-                    updateTailorButton();
-                    showPage('home');
-                }
-            };
-
-            // ─── UTILITIES ────────────────────────────────────────────────
             function updateTailorButton() {
-                const hasJD = state.jobDescription && state.jobDescription.description;
+                const hasJD = state.jobDescription && state.jobDescription.description &&
+                    state.jobDescription.description.length > 20;
                 const hasResume = state.originalResume && Object.keys(state.originalResume).length > 0;
-                tailorBtn.disabled = !(hasJD && hasResume);
+                tailorBtn.disabled = !(hasJD && hasResume && !state.isProcessing);
             }
 
             function setPreview(el, text, isSuccess) {
                 isSuccess = isSuccess !== false;
                 el.classList.remove('hidden');
-                el.style.borderLeftColor = isSuccess ? '#ffd966' : '#ff6b6b';
+                el.style.borderLeftColor = isSuccess ? '#c9a84c' : '#ff6b6b';
                 el.querySelector('strong').textContent = isSuccess ? '✔ Loaded' : '✖ Error';
                 el.querySelector('span').textContent = text;
             }
 
-            function renderTailoredView() {
-                if (!state.tailoredResume) return;
-                originalDisplay.textContent = JSON.stringify(state.originalResume, null, 2);
-                renderEditableResume(state.tailoredResume);
+            // ── Extract text from file ──
+            function readFileAsText(file) {
+                return new Promise(function(resolve, reject) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) { resolve(e.target.result); };
+                    reader.onerror = function(e) { reject(e.target.error); };
+                    reader.readAsText(file);
+                });
             }
 
-            function getCustomPrompt() {
-                if (customPromptToggle.checked) {
-                    return customPromptInput.value.trim();
+            // ── Simple keyword extraction from JD ──
+            function extractRequirements(text) {
+                const commonSkills = ['Python', 'Java', 'JavaScript', 'TypeScript', 'React', 'Angular', 'Vue', 'Node',
+                    'Express', 'Django', 'Flask', 'Spring', 'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'CI/CD',
+                    'Jenkins', 'Git', 'JIRA', 'Agile', 'Scrum', 'SAFe', 'API', 'REST', 'GraphQL', 'SQL', 'MongoDB',
+                    'PostgreSQL', 'MySQL', 'Oracle', 'JMeter', 'Selenium', 'Cypress', 'Playwright', 'Python', 'Go',
+                    'Rust', 'C++', 'C#', 'Ruby', 'PHP', 'Leadership', 'Communication', 'Problem Solving', 'Teamwork'
+                ];
+                const found = [];
+                const lower = text.toLowerCase();
+                commonSkills.forEach(function(skill) {
+                    if (lower.includes(skill.toLowerCase())) {
+                        found.push(skill);
+                    }
+                });
+                return found.slice(0, 12);
+            }
+
+            // ── Build resume sections from RAGina chunks ──
+            function buildResumeSectionsFromEngine(engine) {
+                if (!engine || !engine.chunks || engine.chunks.length === 0) {
+                    return null;
                 }
-                return '';
+                const sections = {};
+                engine.chunks.forEach(function(chunk) {
+                    const key = chunk.source || 'unknown';
+                    if (!sections[key]) sections[key] = [];
+                    sections[key].push(chunk.text);
+                });
+                // Build a structured resume
+                const resume = {
+                    summary: '',
+                    experience: [],
+                    skills: { technical: [], soft: [] },
+                    education: [],
+                    certifications: [],
+                    personalInfo: { firstName: '', lastName: '', email: '', phone: '', linkedin: '' }
+                };
+
+                // Try to populate from chunks
+                for (const [key, texts] of Object.entries(sections)) {
+                    const combined = texts.join('\n');
+                    const lower = key.toLowerCase();
+                    if (lower.includes('summary') || lower.includes('profile')) {
+                        resume.summary = combined;
+                    } else if (lower.includes('experience') || lower.includes('work')) {
+                        // Try to parse multiple experiences
+                        const expBlocks = combined.split(/\n{2,}/);
+                        expBlocks.forEach(function(block) {
+                            if (block.trim().length > 20) {
+                                const lines = block.split('\n').filter(function(l) { return l.trim(); });
+                                const titleLine = lines[0] || '';
+                                const companyMatch = titleLine.match(/at\s+(.+)/i);
+                                const titleMatch = titleLine.match(/^(.*?)(?:\s+at\s+|,)/i);
+                                resume.experience.push({
+                                    title: titleMatch ? titleMatch[1].trim() : titleLine.slice(0, 50),
+                                    company: companyMatch ? companyMatch[1].trim() : 'Unknown',
+                                    location: '',
+                                    startDate: '',
+                                    endDate: '',
+                                    achievements: lines.slice(1).filter(function(l) { return l.trim()
+                                            .length > 5; })
+                                });
+                            }
+                        });
+                        if (resume.experience.length === 0) {
+                            resume.experience.push({
+                                title: 'Professional Experience',
+                                company: 'Various',
+                                location: '',
+                                startDate: '',
+                                endDate: '',
+                                achievements: [combined]
+                            });
+                        }
+                    } else if (lower.includes('skill') || lower.includes('competencies')) {
+                        const skillItems = combined.split(/[,\n]+/).map(function(s) { return s.trim(); }).filter(function(
+                        s) { return s.length > 1; });
+                        resume.skills.technical = skillItems;
+                    } else if (lower.includes('education')) {
+                        resume.education.push({ institution: combined, degree: '', field: '', graduationDate: '' });
+                    } else if (lower.includes('certif')) {
+                        resume.certifications.push({ name: combined, issuer: '', date: '' });
+                    } else if (lower.includes('personal') || lower.includes('contact')) {
+                        // Try to extract email, phone, etc.
+                        const emailMatch = combined.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+                        if (emailMatch) resume.personalInfo.email = emailMatch[0];
+                        const phoneMatch = combined.match(/\+?[\d\s\-()]{8,}/);
+                        if (phoneMatch) resume.personalInfo.phone = phoneMatch[0];
+                    }
+                }
+
+                // If no summary, create one from experience
+                if (!resume.summary && resume.experience.length > 0) {
+                    const firstExp = resume.experience[0];
+                    resume.summary =
+                        `Experienced professional with background in ${firstExp.title || 'software development'}. Proven track record in delivering high-quality solutions.`;
+                }
+
+                return resume;
             }
 
-            // ─── MOCK CURIFY LOGIC ────────────────────────────────────────
+            // ================================================================
+            // 6. LOAD JOB DESCRIPTION
+            // ================================================================
+            function loadJobDescription(data) {
+                if (typeof data === 'string') {
+                    // Treat as description text
+                    state.jobDescription = {
+                        company: 'Unknown Company',
+                        title: 'Job Description',
+                        description: data,
+                        requirements: extractRequirements(data)
+                    };
+                } else if (data && data.description) {
+                    state.jobDescription = data;
+                    if (!state.jobDescription.requirements) {
+                        state.jobDescription.requirements = extractRequirements(data.description);
+                    }
+                } else {
+                    showToast('error', '🪼 Invalid JD', 'Could not parse the job description.');
+                    return;
+                }
+
+                const previewText = (state.jobDescription.company || '') + ' — ' +
+                    (state.jobDescription.title || '') + '\n' +
+                    (state.jobDescription.description || '').slice(0, 150) + '...';
+                setPreview(jdPreview, previewText, true);
+                updateTailorButton();
+                showToast('success', '🐟 JD Loaded', 'Job description ready for tailoring.');
+                setStatus('✅ Job description loaded. Load your resume to continue.');
+            }
+
+            // ── Fetch from URL (mock) ──
+            fetchJdBtn.addEventListener('click', function() {
+                const url = jdInput.value.trim();
+                if (!url) {
+                    showToast('warning', '🐚 Missing URL', 'Please enter a job link.');
+                    return;
+                }
+                setStatus('⏳ Fetching job description...', true);
+                // Simulate fetch delay
+                setTimeout(function() {
+                    // In a real app, you'd call a serverless function.
+                    // For demo, we create a mock JD from the URL.
+                    const company = url.includes('linkedin') ? 'LinkedIn' :
+                        url.includes('workday') ? 'Workday' :
+                        url.includes('greenhouse') ? 'Greenhouse' : 'Company';
+                    const title = url.split('/').pop()?.replace(/-/g, ' ') || 'Job Title';
+                    const mockJD = {
+                        company: company,
+                        title: title,
+                        description: 'We are looking for a talented professional with strong experience in software development, automation, and team collaboration. The ideal candidate will have a background in Python, Java, or similar languages, and experience with Agile methodologies. Excellent communication skills and a passion for continuous learning are essential.',
+                        requirements: ['Python', 'Java', 'Agile/Scrum', 'Communication', 'Team Collaboration']
+                    };
+                    loadJobDescription(mockJD);
+                    jdPaste.value = mockJD.description;
+                    setStatus('✅ Job fetched successfully.');
+                }, 1200);
+            });
+
+            // ── Paste input ──
+            jdPaste.addEventListener('input', function() {
+                const text = this.value.trim();
+                if (text.length > 50) {
+                    loadJobDescription(text);
+                }
+            });
+
+            // ── File upload for JD ──
+            jdFileDrop.addEventListener('click', function() { jdFileInput.click(); });
+            jdFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                setStatus('⏳ Reading file...', true);
+                readFileAsText(file).then(function(text) {
+                    loadJobDescription(text);
+                    setStatus('✅ File loaded.');
+                    showToast('success', '🐟 File loaded', 'Job description extracted from ' + file.name);
+                }).catch(function(err) {
+                    showToast('error', '🪼 Read error', err.message);
+                    setStatus('❌ Failed to read file.');
+                });
+            });
+
+            // ================================================================
+            // 7. LOAD RESUME
+            // ================================================================
+            function loadResume(data) {
+                if (data && data.bodyText) {
+                    // Single section resume
+                    state.originalResume = {
+                        summary: data.bodyText,
+                        experience: [{ title: 'Experience', company: '', achievements: [data.bodyText] }],
+                        skills: { technical: [], soft: [] },
+                        education: [],
+                        certifications: []
+                    };
+                } else if (data && typeof data === 'object' && !Array.isArray(data)) {
+                    // Already structured
+                    state.originalResume = data;
+                } else if (typeof data === 'string') {
+                    // Raw text – try to structure
+                    const lines = data.split('\n').filter(function(l) { return l.trim(); });
+                    state.originalResume = {
+                        summary: lines.slice(0, 3).join(' '),
+                        experience: [{
+                            title: 'Experience',
+                            company: '',
+                            achievements: lines
+                        }],
+                        skills: { technical: [], soft: [] },
+                        education: [],
+                        certifications: []
+                    };
+                } else {
+                    showToast('error', '🪼 Invalid resume', 'Could not parse the resume data.');
+                    return;
+                }
+
+                // Ensure required fields
+                if (!state.originalResume.skills) state.originalResume.skills = { technical: [], soft: [] };
+                if (!state.originalResume.experience) state.originalResume.experience = [];
+                if (!state.originalResume.education) state.originalResume.education = [];
+                if (!state.originalResume.summary) state.originalResume.summary = '';
+
+                const summaryText = (state.originalResume.personalInfo?.firstName || '') + ' ' +
+                    (state.originalResume.personalInfo?.lastName || '') + ' — ' +
+                    state.originalResume.experience.length + ' experiences, ' +
+                    (state.originalResume.skills?.technical?.length || 0) + ' skills';
+                setPreview(resumePreview, summaryText || 'Resume loaded successfully.', true);
+                updateTailorButton();
+                showToast('success', '🐟 Resume Loaded', 'Your resume is ready for tailoring.');
+                setStatus('✅ Resume loaded. Ready to tailor!');
+            }
+
+            // ── File upload for Resume ──
+            resumeFileDrop.addEventListener('click', function() { resumeFileInput.click(); });
+            resumeFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                setStatus('⏳ Parsing resume...', true);
+                readFileAsText(file).then(function(text) {
+                    // In a real app, you'd use PDF.js or mammoth.js for binary formats.
+                    // For demo, we treat it as text.
+                    loadResume(text);
+                    setStatus('✅ Resume parsed.');
+                    showToast('success', '🐟 Resume loaded', 'Extracted from ' + file.name);
+                }).catch(function(err) {
+                    showToast('error', '🪼 Read error', err.message);
+                    setStatus('❌ Failed to read resume.');
+                });
+            });
+
+            // ── Gist load (mock) ──
+            loadGistBtn.addEventListener('click', function() {
+                const gistId = resumeGistInput.value.trim();
+                if (!gistId) {
+                    showToast('warning', '🐚 Missing Gist ID', 'Please enter a Gist ID or URL.');
+                    return;
+                }
+                setStatus('⏳ Loading from Gist...', true);
+                setTimeout(function() {
+                    // Mock: create a sample resume
+                    const mockResume = {
+                        personalInfo: { firstName: 'Sai', lastName: 'Varakala', email: 'sai@example.com',
+                            phone: '+91 8341277189', linkedin: 'https://linkedin.com/in/suryasticsai' },
+                        summary: 'Experienced QA Engineer and Scrum Master with 6+ years in the industry. Skilled in Java, Python, automation testing, and Agile methodologies.',
+                        experience: [{
+                            title: 'Senior QA Engineer',
+                            company: 'Tata Consultancy Services',
+                            location: 'Hyderabad',
+                            startDate: '2020-01',
+                            endDate: 'Present',
+                            achievements: [
+                                'Led API automation testing initiatives using Python and Postman, reducing regression cycle time by 40%.',
+                                'Implemented performance test scripts with JMeter, identifying bottlenecks and improving system throughput.',
+                                'Collaborated with developers and product owners in an Agile/Scrum environment to refine acceptance criteria and ensure test coverage.'
+                            ]
+                        }, {
+                            title: 'Java Developer',
+                            company: 'Cigna Healthcare',
+                            location: 'USA',
+                            startDate: '2018-06',
+                            endDate: '2019-12',
+                            achievements: [
+                                'Full Stack Java developer on a healthcare insurance modernization program, owning critical backend modules.',
+                                'Partnered with QA Engineers and BAs to validate end-to-end business workflows and improve overall delivery quality.'
+                            ]
+                        }],
+                        skills: { technical: ['Python', 'Java', 'JavaScript', 'API Testing', 'JMeter', 'Agile/Scrum',
+                                'JIRA'
+                            ], soft: ['Leadership', 'Communication', 'Problem Solving'] },
+                        education: [{ institution: 'JNTU Hyderabad', degree: 'B.Tech', field: 'Computer Science',
+                            graduationDate: '2018' }],
+                        certifications: [{ name: 'Certified Scrum Master', issuer: 'Scrum Alliance', date: '2021' }]
+                    };
+                    loadResume(mockResume);
+                    setStatus('✅ Gist loaded.');
+                    showToast('success', '🐟 Gist loaded', 'Resume restored from Gist.');
+                }, 1000);
+            });
+
+            // ================================================================
+            // 8. TAILOR (Curify) LOGIC
+            // ================================================================
+            function getCustomPrompt() {
+                return customPromptToggle.checked ? customPromptInput.value.trim() : '';
+            }
+
+            // ── Mock curify function (simulates AI rewriting) ──
             function mockCurify(sectionType, originalText, jobDesc, customPrompt) {
                 if (!jobDesc || !jobDesc.description) return originalText;
 
-                const keywords = [];
                 const jdText = jobDesc.description;
-                const commonKeywords = ['Python', 'Java', 'JavaScript', 'API', 'JMeter', 'Agile', 'Scrum', 'Leadership',
-                    'Automation', 'Testing', 'Cloud', 'AWS', 'React', 'Angular', 'Vue', 'Node', 'Express', 'MongoDB',
-                    'SQL', 'PostgreSQL', 'CI/CD', 'Docker', 'Kubernetes', 'Git', 'JIRA', 'Confluence'
-                ];
-                commonKeywords.forEach(function(kw) {
-                    if (jdText.toLowerCase().includes(kw.toLowerCase())) {
-                        keywords.push(kw);
-                    }
-                });
+                const keywords = extractRequirements(jdText);
+                const promptSuffix = customPrompt ? ' (Instruction: ' + customPrompt + ')' : '';
 
                 let result = originalText;
-                const promptSuffix = customPrompt ? ' Custom instruction: ' + customPrompt : '';
 
                 switch (sectionType) {
                     case 'summary':
+                        const skillStr = keywords.length > 0 ? keywords.slice(0, 4).join(', ') : 'software development';
                         result =
-                            `Experienced professional with a strong background in ${keywords.length > 0 ? keywords.slice(0, 3).join(', ') : 'software engineering'}. Proven track record of delivering high-impact solutions in fast-paced environments. Passionate about leveraging ${keywords.length > 0 ? keywords.slice(0, 2).join(' and ') : 'technology'} to drive business value and team success. ${promptSuffix}`;
+                            `Experienced professional with a strong background in ${skillStr}. Proven track record of delivering high-impact solutions in fast-paced environments. Passionate about leveraging technology to drive business value and team success.${promptSuffix}`;
                         break;
+
                     case 'experience':
+                        // Rewrite achievements to include keywords
                         if (Array.isArray(originalText)) {
-                            result = originalText.map(function(exp) {
-                                let newAchievements = exp.achievements.map(function(ach) {
-                                    let newAch = ach;
-                                    keywords.forEach(function(kw) {
-                                        if (!newAch.toLowerCase().includes(kw.toLowerCase())) {
-                                            // Insert keyword naturally
-                                            newAch =
-                                                `Utilized ${kw} to enhance ${newAch.toLowerCase().replace(/^[a-z]/, function(m){ return m.toUpperCase(); })}`;
-                                        }
-                                    });
-                                    return newAch;
+                            result = originalText.map(function(ach) {
+                                let newAch = ach;
+                                keywords.forEach(function(kw) {
+                                    if (!newAch.toLowerCase().includes(kw.toLowerCase())) {
+                                        newAch =
+                                            `Utilized ${kw} to enhance ${newAch.toLowerCase().replace(/^[a-z]/, function(m){ return m.toUpperCase(); })}`;
+                                    }
                                 });
-                                return { ...exp, achievements: newAchievements };
+                                return newAch;
                             });
-                        } else {
-                            // If originalText is a string (e.g., single role description), rewrite it
+                        } else if (typeof originalText === 'string') {
                             let newText = originalText;
                             keywords.forEach(function(kw) {
                                 if (!newText.toLowerCase().includes(kw.toLowerCase())) {
@@ -1418,9 +1449,12 @@
                                         `Implemented ${kw} solutions to improve ${newText.toLowerCase().replace(/^[a-z]/, function(m){ return m.toUpperCase(); })}`;
                                 }
                             });
-                            result = newText + ' ' + promptSuffix;
+                            result = newText + promptSuffix;
+                        } else {
+                            result = originalText;
                         }
                         break;
+
                     case 'skills':
                         let skillsList = originalText.split(',').map(function(s) { return s.trim(); });
                         keywords.forEach(function(kw) {
@@ -1430,572 +1464,498 @@
                         });
                         result = skillsList.join(', ');
                         break;
-                    case 'hobbies':
-                        const hobbySuggestions = ['Open Source Contribution', 'Technical Blogging', 'Hackathons',
-                            'Mentoring Junior Developers', 'Playing Chess', 'Reading Tech Books', 'Cycling',
-                            'Photography'
-                        ];
-                        const selectedHobbies = hobbySuggestions.slice(0, 3 + Math.floor(Math.random() * 3));
-                        result = selectedHobbies.join(', ') + '. ' + promptSuffix;
+
+                    case 'all':
+                        // For "All", we return a placeholder – actual implementation would combine
+                        result = 'Curified all sections. Use individual buttons for more control.';
                         break;
-                    case 'additional':
-                        result =
-                            `Proven ability to ${keywords.length > 0 ? keywords.slice(0, 2).join(' and ') : 'adapt and deliver'} in dynamic environments. Strong communication and collaboration skills. ${promptSuffix}`;
-                        break;
+
                     default:
                         break;
                 }
+
                 return result;
             }
 
-            // ─── RENDER COMPARISON PANEL ──────────────────────────────────
-            function renderComparisonPanel() {
-                // Show panel
-                comparisonPanel.classList.remove('hidden');
-
-                // 1. Job Requirements
-                let jdHtml = '';
-                if (state.jobDescription && state.jobDescription.requirements) {
-                    state.jobDescription.requirements.forEach(function(req) {
-                        jdHtml += '<li>' + req + '</li>';
-                    });
-                } else if (state.jobDescription && state.jobDescription.description) {
-                    // Extract some bullet points from description
-                    const lines = state.jobDescription.description.split('\n').filter(function(l) { return l.trim()
-                            .length > 10; });
-                    lines.slice(0, 6).forEach(function(line) {
-                        jdHtml += '<li>' + line.trim() + '</li>';
-                    });
-                } else {
-                    jdHtml = '<p class="text-muted small">No job requirements extracted.</p>';
+            // ── Perform curification on a specific section ──
+            function curifySection(sectionType, currentText) {
+                if (!state.jobDescription) {
+                    showToast('warning', '🐚 No JD', 'Please load a job description first.');
+                    return currentText;
                 }
-                jdRequirementsList.innerHTML = '<ul>' + jdHtml + '</ul>';
-
-                // 2. Current Resume
-                let resumeHtml = '';
-                if (state.originalResume) {
-                    const r = state.originalResume;
-                    if (r.summary) resumeHtml += '<li><strong>Summary:</strong> ' + r.summary + '</li>';
-                    if (r.experience) {
-                        r.experience.forEach(function(exp) {
-                            resumeHtml += '<li><strong>' + exp.title + ' at ' + exp.company + '</strong>: ' +
-                                exp.achievements.slice(0, 2).join('; ') + '...</li>';
-                        });
-                    }
-                    if (r.skills && r.skills.technical) {
-                        resumeHtml += '<li><strong>Technical Skills:</strong> ' + r.skills.technical.join(', ') +
-                            '</li>';
-                    }
-                    if (r.skills && r.skills.soft) {
-                        resumeHtml += '<li><strong>Soft Skills:</strong> ' + r.skills.soft.join(', ') + '</li>';
-                    }
-                }
-                if (!resumeHtml) {
-                    resumeHtml = '<p class="text-muted small">No resume data loaded.</p>';
-                } else {
-                    resumeHtml = '<ul>' + resumeHtml + '</ul>';
-                }
-                currentResumeList.innerHTML = resumeHtml;
-
-                // 3. Curified Suggestions (Editable + Curify Buttons)
-                let curifyHtml = '';
-                const r = state.originalResume;
-
-                // Helper to render a section with Curify button
-                function renderSection(label, fieldKey, value, isArray, arrayIndex) {
-                    let html = '<div class="form-group mb-2">';
-                    html += '<label style="font-size:0.75rem; color:#8ab0c0; text-transform:uppercase;">' + label +
-                        '</label>';
-
-                    let displayValue = value;
-                    if (isArray && arrayIndex !== undefined) {
-                        // For array items (like experience achievements)
-                        if (Array.isArray(value)) {
-                            displayValue = value.join('\n');
-                        } else {
-                            displayValue = value || '';
-                        }
-                    }
-
-                    html += '<textarea class="form-control" style="min-height:40px; font-size:0.85rem;" data-field="' +
-                        fieldKey + '" data-index="' + (arrayIndex !== undefined ? arrayIndex : '') + '">' + (displayValue ||
-                        '') + '</textarea>';
-                    html += '<div class="curify-actions">';
-                    html +=
-                        '<button class="btn-curify-sharp" onclick="window.curifySection(\'' + fieldKey + '\', ' + (arrayIndex !==
-                            undefined ? arrayIndex : 'null') + ')"><i class="fas fa-wand-magic-sparkles"></i> Curify</button>';
-                    html += '</div>';
-                    html += '</div>';
-                    return html;
+                if (!state.originalResume) {
+                    showToast('warning', '🐚 No Resume', 'Please load your resume first.');
+                    return currentText;
                 }
 
-                if (r) {
-                    // Summary
-                    curifyHtml += renderSection('Summary', 'summary', r.summary || '');
-
-                    // Experience (Roles & Responsibilities)
-                    if (r.experience) {
-                        r.experience.forEach(function(exp, idx) {
-                            curifyHtml += renderSection('Experience (' + exp.title + ')', 'experience', exp
-                                .achievements.join('\n'), true, idx);
-                        });
-                    }
-
-                    // Skills
-                    curifyHtml += renderSection('Technical Skills', 'skills', (r.skills && r.skills.technical) ? r
-                        .skills.technical.join(', ') : '');
-
-                    // Hobbies (if available, else show placeholder)
-                    curifyHtml += renderSection('Hobbies', 'hobbies', r.hobbies || 'Coding, Reading, Traveling');
-
-                    // Additional Info
-                    curifyHtml += renderSection('Additional Info', 'additional', r.additional || '');
-                }
-
-                if (!curifyHtml) {
-                    curifyHtml = '<p class="text-muted small">Load a resume to start curifying.</p>';
-                }
-                curifiedSuggestions.innerHTML = curifyHtml;
-            }
-
-            // ─── CURIFY SECTION (called from buttons) ─────────────────────
-            window.curifySection = function(fieldKey, index) {
-                const textarea = document.querySelector('textarea[data-field="' + fieldKey + '"]' + (index !== null ?
-                    '[data-index="' + index + '"]' : ''));
-                if (!textarea) {
-                    // Fallback: find by attribute
-                    const allTextareas = document.querySelectorAll('#curifiedSuggestions textarea');
-                    let target = null;
-                    allTextareas.forEach(function(el) {
-                        if (el.dataset.field === fieldKey && (index === null || el.dataset.index == index)) {
-                            target = el;
-                        }
-                    });
-                    if (target) textarea = target;
-                }
-                if (!textarea) {
-                    alert('Could not find the target section to curify.');
-                    return;
-                }
-
-                const originalText = textarea.value;
-                const jobDesc = state.jobDescription;
                 const customPrompt = getCustomPrompt();
+                const result = mockCurify(sectionType, currentText, state.jobDescription, customPrompt);
 
-                if (!jobDesc) {
-                    alert('Please load a job description first.');
-                    return;
-                }
-
-                SoundFX.splash(0.1);
-                const curifiedText = mockCurify(fieldKey, originalText, jobDesc, customPrompt);
-                textarea.value = curifiedText;
-
-                // Also update the state.curifiedSuggestions if needed
-                if (!state.curifiedSuggestions) state.curifiedSuggestions = {};
-                state.curifiedSuggestions[fieldKey] = curifiedText;
-                SoundFX.giggle(0.08);
-            };
-
-            // ─── TABS ──────────────────────────────────────────────────────
-            function setupTabs(container, inputs) {
-                container.forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        container.forEach(function(b) { b.classList.remove('active'); });
-                        this.classList.add('active');
-                        const target = this.dataset.target;
-                        Object.keys(inputs).forEach(function(key) {
-                            inputs[key].classList.toggle('hidden', key !== target);
-                        });
-                        SoundFX.pop(0.04, 600);
-                    });
-                });
-            }
-            setupTabs(jdTabs, jdInputs);
-            setupTabs(resumeTabs, resumeInputs);
-
-            // ─── MOCK DATA (reused for demo) ──────────────────────────────
-            function mockJobDescription(url) {
-                return {
-                    company: 'LSEG (London Stock Exchange Group)',
-                    title: 'Senior QA Engineer (Functional QA)',
-                    description: 'Role Profile: We are looking for a Senior QA Engineer with strong Python and API testing experience. You will be responsible for designing and implementing test plans, building automation frameworks, and collaborating with cross-functional teams to ensure high quality deliverables. Experience with JMeter and Agile/Scrum methodologies is a plus.',
-                    requirements: [
-                        '10+ years of experience in software testing',
-                        'Strong Python skills',
-                        'Experience with API automation tools (e.g., Postman, REST Assured)',
-                        'Knowledge of JMeter or similar performance testing tools',
-                        'Excellent communication and team collaboration'
-                    ],
-                    responsibilities: [
-                        'Design and implement test plans for API and web applications',
-                        'Build, maintain and update automated test scenarios',
-                        'Collaborate with developers and product owners to refine requirements',
-                        'Report bugs and track issues to closure'
-                    ]
-                };
+                showToast('success', '🐟 Curified!', '✨ ' + sectionType + ' updated based on job description.');
+                return result;
             }
 
-            function mockResumeParsing(file) {
-                return {
-                    personalInfo: {
-                        firstName: 'Sai',
-                        lastName: 'Varakala',
-                        email: 'sai.varakala13@gmail.com',
-                        phone: '+91 8341277189',
-                        address: { street: '18-3-463/A/1/A/1, Rajanna Bowli', city: 'Hyderabad', postalCode: '500053',
-                            country: 'India' },
-                        linkedin: 'https://linkedin.com/In/suryasticsai'
-                    },
-                    summary: 'Experienced QA Engineer and Scrum Master with 6+ years in the industry. Skilled in Java, Python, automation testing, and Agile methodologies. Passionate about delivering high-quality software through effective testing and collaboration.',
-                    experience: [{
-                        title: 'Automobile Client (Insurance Domain)',
-                        company: 'Tata Consultancy Services',
-                        location: 'Hyderabad, India',
-                        startDate: '2024-01',
-                        endDate: '2026-01',
-                        achievements: [
-                            'Represented 3 Scrum teams within a SAFe ART on JIRA, aligning Product Owners, Architects, RTE, and stakeholders on PI objectives and cross-team dependencies.',
-                            'Facilitated all Scrum and ART ceremonies with structured facilitation techniques, driving clarity, engagement, and delivery focus.',
-                            'Introduced Sprint Card gamification and Zoom poll techniques, increasing team participation, transparency, and ownership via sprint-wise scoring using JIRA data.',
-                            'Built JavaScript-based velocity calculators and capacity planning utilities embedded in Confluence, reducing manual effort and improving planning accuracy.',
-                            'Created advanced JQL Jira dashboards and Confluence boards for real-time reporting on velocity, spillover, PI progress, and ART-level risks.'
-                        ]
-                    }, {
-                        title: 'Java Full Stack Developer',
-                        company: 'TCS MasterCraft (Internal Product)',
-                        location: 'Hyderabad, India',
-                        startDate: '2021-01',
-                        endDate: '2023-12',
-                        achievements: [
-                            'Designed and implemented compiler components (Lexer, Parser, Unparser, Grammar Rules) using Java and ANTLR4, while leading feature delivery and supporting onboarding as an informal team lead.',
-                            'Expanded responsibilities from UI/UX to backend ownership, building internal learning and productivity tools that improved new-engineer understanding of system architecture and tooling.'
-                        ]
-                    }],
-                    education: [],
-                    skills: { technical: ['Python', 'Java', 'JavaScript', 'API Testing', 'JMeter', 'JIRA', 'Agile/Scrum'],
-                        soft: ['Leadership', 'Communication', 'Problem Solving'] },
-                    hobbies: 'Coding, Reading, Traveling',
-                    additional: 'Certified Scrum Master (CSM), ISTQB Certified Tester.',
-                    certifications: []
-                };
-            }
-
-            // ─── HANDLERS: JOB ────────────────────────────────────────────
-            fetchJobBtn.addEventListener('click', function() {
-                const url = jobUrlInput.value.trim();
-                if (!url) {
-                    SoundFX.error();
-                    alert('Please enter a valid job URL.');
-                    return;
-                }
-                SoundFX.splash(0.12);
-                setPreview(jdPreview, 'Fetching job description...', true);
-                setTimeout(function() {
-                    const job = mockJobDescription(url);
-                    state.jobDescription = job;
-                    const previewText = job.company + ' — ' + job.title + '\n' + job.description.slice(0, 150) +
-                    '...';
-                    setPreview(jdPreview, previewText, true);
-                    updateTailorButton();
-                    jobPasteInput.value = job.description;
-                    if (state.originalResume) {
-                        renderComparisonPanel();
-                    }
-                    SoundFX.pop(0.1, 800);
-                }, 800);
-            });
-
-            jobPasteInput.addEventListener('input', function() {
-                const text = this.value.trim();
-                if (text.length > 50) {
-                    state.jobDescription = {
-                        company: 'Unknown Company',
-                        title: 'Unknown Title',
-                        description: text,
-                        requirements: [],
-                        responsibilities: []
-                    };
-                    setPreview(jdPreview, 'Pasted description (' + text.length + ' chars)', true);
-                    updateTailorButton();
-                    if (state.originalResume) {
-                        renderComparisonPanel();
-                    }
-                    SoundFX.pop(0.04, 500);
-                }
-            });
-
-            jobFileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                SoundFX.splash(0.12);
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    const text = ev.target.result;
-                    state.jobDescription = {
-                        company: 'From File',
-                        title: 'Job Description',
-                        description: text,
-                        requirements: [],
-                        responsibilities: []
-                    };
-                    setPreview(jdPreview, 'Loaded from file: ' + file.name + ' (' + text.length + ' chars)', true);
-                    updateTailorButton();
-                    if (state.originalResume) {
-                        renderComparisonPanel();
-                    }
-                    SoundFX.pop(0.1, 800);
-                };
-                reader.readAsText(file);
-            });
-
-            // ─── HANDLERS: RESUME ─────────────────────────────────────────
-            function handleResumeLoaded(resumeData) {
-                state.originalResume = resumeData;
-                state.curifiedSuggestions = {
-                    summary: resumeData.summary || '',
-                    experience: resumeData.experience ? resumeData.experience.map(function(e) { return e
-                            .achievements.join('\n'); }) : [],
-                    skills: resumeData.skills ? resumeData.skills.technical.join(', ') : '',
-                    hobbies: resumeData.hobbies || '',
-                    additional: resumeData.additional || ''
-                };
-                const summary = resumeData.personalInfo.firstName + ' ' + resumeData.personalInfo.lastName +
-                    ' – ' + resumeData.experience.length + ' experiences, ' + resumeData.skills.technical.length +
-                    ' skills';
-                setPreview(resumePreview, summary, true);
-                updateTailorButton();
-                if (state.jobDescription) {
-                    renderComparisonPanel();
-                }
-                SoundFX.giggle(0.08);
-            }
-
-            resumeFileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                SoundFX.splash(0.12);
-                setPreview(resumePreview, 'Parsing resume...', true);
-                setTimeout(function() {
-                    const resume = mockResumeParsing(file);
-                    handleResumeLoaded(resume);
-                }, 1000);
-            });
-
-            fetchLinkedinBtn.addEventListener('click', function() {
-                const url = linkedinInput.value.trim();
-                if (!url) {
-                    SoundFX.error();
-                    alert('Please enter a LinkedIn profile URL.');
-                    return;
-                }
-                SoundFX.splash(0.12);
-                setPreview(resumePreview, 'Fetching LinkedIn profile...', true);
-                setTimeout(function() {
-                    const resume = mockResumeParsing(null);
-                    resume.personalInfo.firstName = 'Sai (LinkedIn)';
-                    handleResumeLoaded(resume);
-                }, 900);
-            });
-
-            fetchGistBtn.addEventListener('click', function() {
-                const gistId = gistInput.value.trim();
-                if (!gistId) {
-                    SoundFX.error();
-                    alert('Please enter a Gist ID or URL.');
-                    return;
-                }
-                SoundFX.splash(0.12);
-                setPreview(resumePreview, 'Loading Gist...', true);
-                setTimeout(function() {
-                    const resume = mockResumeParsing(null);
-                    resume.personalInfo.firstName = 'Sai (Gist)';
-                    handleResumeLoaded(resume);
-                }, 700);
-            });
-
-            // ─── TAILOR (Full generation) ──────────────────────────────────
+            // ── Main Tailor button ──
             tailorBtn.addEventListener('click', function() {
-                if (tailorBtn.disabled) {
-                    SoundFX.error();
-                    return;
-                }
-                SoundFX.splash(0.15);
+                if (tailorBtn.disabled || state.isProcessing) return;
+                state.isProcessing = true;
                 tailorBtn.disabled = true;
-                tailorLoader.classList.add('show');
+                setStatus('🧜‍♀️ CurVina is swimming through your resume...', true);
 
+                // Simulate processing
                 setTimeout(function() {
+                    // Build a tailored resume from the original
                     const original = state.originalResume;
                     const tailored = JSON.parse(JSON.stringify(original));
 
-                    if (state.jobDescription) {
-                        const jd = state.jobDescription;
-                        tailored.summary =
-                            'Experienced QA Engineer and Scrum Master with 6+ years in the industry. Proven expertise in Python, API automation, and performance testing with JMeter. Strong background in Agile/Scrum methodologies, driving quality and collaboration across cross-functional teams. Passionate about delivering high-quality software through effective testing strategies.';
+                    // Apply curification to summary
+                    if (tailored.summary) {
+                        tailored.summary = mockCurify('summary', tailored.summary, state.jobDescription,
+                        getCustomPrompt());
+                    }
 
-                        if (tailored.experience.length > 0) {
-                            const exp = tailored.experience[0];
-                            exp.achievements = [
-                                'Led API automation testing initiatives using Python and Postman, reducing regression cycle time by 40%.',
-                                'Implemented performance test scripts with JMeter, identifying bottlenecks and improving system throughput.',
-                                'Collaborated with developers and product owners in an Agile/Scrum environment to refine acceptance criteria and ensure test coverage.',
-                                'Mentored junior QA engineers on automation best practices and test design.',
-                                'Integrated automated tests into CI/CD pipelines, achieving 85% automation coverage.'
-                            ];
-                        }
+                    // Curify experience achievements
+                    if (tailored.experience) {
+                        tailored.experience.forEach(function(exp) {
+                            if (exp.achievements && exp.achievements.length > 0) {
+                                exp.achievements = mockCurify('experience', exp.achievements, state
+                                    .jobDescription, getCustomPrompt());
+                            }
+                        });
+                    }
+
+                    // Curify skills
+                    if (tailored.skills && tailored.skills.technical) {
+                        const skillsStr = tailored.skills.technical.join(', ');
+                        const newSkills = mockCurify('skills', skillsStr, state.jobDescription, getCustomPrompt());
+                        tailored.skills.technical = newSkills.split(',').map(function(s) { return s.trim(); });
                     }
 
                     state.tailoredResume = tailored;
-                    renderTailoredView();
-                    tailorLoader.classList.remove('show');
+
+                    // Render output
+                    renderOutput(original, tailored);
+
+                    setStatus('✅ Resume tailored successfully!');
+                    showToast('success', '🧜‍♀️ Done!', 'Your ATS‑friendly resume is ready. Review and export.');
+                    state.isProcessing = false;
                     tailorBtn.disabled = false;
-                    showPage('tailor');
-                    SoundFX.giggle(0.12);
-                }, 2500);
+                }, 2800);
             });
 
-            // ─── RENDER EDITABLE ──────────────────────────────────────────
-            function renderEditableResume(resume) {
-                const container = tailoredEditor;
-                container.innerHTML = '';
-
-                const pi = resume.personalInfo;
-                const piDiv = document.createElement('div');
-                piDiv.className = 'form-group';
-                piDiv.innerHTML = `
-                    <label>First Name</label>
-                    <input type="text" value="${pi.firstName || ''}" data-field="personalInfo.firstName" />
-                    <label>Last Name</label>
-                    <input type="text" value="${pi.lastName || ''}" data-field="personalInfo.lastName" />
-                    <label>Email</label>
-                    <input type="email" value="${pi.email || ''}" data-field="personalInfo.email" />
-                    <label>Phone</label>
-                    <input type="text" value="${pi.phone || ''}" data-field="personalInfo.phone" />
-                    <label>Address</label>
-                    <input type="text" value="${pi.address?.street || ''}" data-field="personalInfo.address.street" placeholder="Street" />
-                    <input type="text" value="${pi.address?.city || ''}" data-field="personalInfo.address.city" placeholder="City" />
-                    <input type="text" value="${pi.address?.postalCode || ''}" data-field="personalInfo.address.postalCode" placeholder="Postal Code" />
-                    <input type="text" value="${pi.address?.country || ''}" data-field="personalInfo.address.country" placeholder="Country" />
-                    <label>LinkedIn</label>
-                    <input type="url" value="${pi.linkedin || ''}" data-field="personalInfo.linkedin" />
-                `;
-                container.appendChild(piDiv);
-
-                const sumDiv = document.createElement('div');
-                sumDiv.className = 'form-group';
-                sumDiv.innerHTML = `
-                    <label>Summary</label>
-                    <textarea data-field="summary">${resume.summary || ''}</textarea>
-                `;
-                container.appendChild(sumDiv);
-
-                const expDiv = document.createElement('div');
-                expDiv.className = 'form-group';
-                expDiv.innerHTML = '<label>Experience</label>';
-                resume.experience.forEach(function(exp, idx) {
-                    const item = document.createElement('div');
-                    item.className = 'array-item';
-                    item.innerHTML = `
-                        <input type="text" value="${exp.title || ''}" placeholder="Job Title" data-field="experience[${idx}].title" />
-                        <input type="text" value="${exp.company || ''}" placeholder="Company" data-field="experience[${idx}].company" />
-                        <input type="text" value="${exp.location || ''}" placeholder="Location" data-field="experience[${idx}].location" />
-                        <input type="text" value="${exp.startDate || ''}" placeholder="Start Date" data-field="experience[${idx}].startDate" />
-                        <input type="text" value="${exp.endDate || ''}" placeholder="End Date" data-field="experience[${idx}].endDate" />
-                        <textarea placeholder="Achievements (one per line)" data-field="experience[${idx}].achievements">${(exp.achievements || []).join('\n')}</textarea>
-                    `;
-                    expDiv.appendChild(item);
-                });
-                container.appendChild(expDiv);
-
-                const skillsDiv = document.createElement('div');
-                skillsDiv.className = 'form-group';
-                skillsDiv.innerHTML = `
-                    <label>Technical Skills (comma separated)</label>
-                    <input type="text" value="${(resume.skills?.technical || []).join(', ')}" data-field="skills.technical" />
-                    <label>Soft Skills (comma separated)</label>
-                    <input type="text" value="${(resume.skills?.soft || []).join(', ')}" data-field="skills.soft" />
-                `;
-                container.appendChild(skillsDiv);
-
-                container.querySelectorAll('[data-field]').forEach(function(el) {
-                    el.addEventListener('input', function() {
-                        SoundFX.pop(0.02, 400);
+            // ─── Render Output ──────────────────────────────────────────────
+            function renderOutput(original, tailored) {
+                // Original (read-only)
+                let origText = '';
+                if (original.summary) origText += 'SUMMARY\n' + original.summary + '\n\n';
+                if (original.experience) {
+                    original.experience.forEach(function(exp) {
+                        origText += exp.title + ' at ' + exp.company + '\n';
+                        if (exp.achievements) {
+                            exp.achievements.forEach(function(ach) {
+                                origText += '  • ' + ach + '\n';
+                            });
+                        }
+                        origText += '\n';
                     });
+                }
+                if (original.skills && original.skills.technical) {
+                    origText += 'SKILLS\n' + original.skills.technical.join(', ') + '\n\n';
+                }
+                if (original.education) {
+                    original.education.forEach(function(edu) {
+                        origText += 'EDUCATION\n' + edu.institution + ' – ' + (edu.degree || '') + '\n\n';
+                    });
+                }
+                if (origText.length < 20) origText = 'No resume data available.';
+                originalContent.textContent = origText;
+
+                // Curified (editable)
+                let curText = '';
+                if (tailored.summary) curText += 'SUMMARY\n' + tailored.summary + '\n\n';
+                if (tailored.experience) {
+                    tailored.experience.forEach(function(exp) {
+                        curText += exp.title + ' at ' + exp.company + '\n';
+                        if (exp.achievements) {
+                            exp.achievements.forEach(function(ach) {
+                                curText += '  • ' + ach + '\n';
+                            });
+                        }
+                        curText += '\n';
+                    });
+                }
+                if (tailored.skills && tailored.skills.technical) {
+                    curText += 'SKILLS\n' + tailored.skills.technical.join(', ') + '\n\n';
+                }
+                if (tailored.education) {
+                    tailored.education.forEach(function(edu) {
+                        curText += 'EDUCATION\n' + edu.institution + ' – ' + (edu.degree || '') + '\n\n';
+                    });
+                }
+                if (curText.length < 20) curText = 'No tailored resume yet.';
+                curifiedContent.textContent = curText;
+
+                // Make curified editable
+                curifiedContent.contentEditable = true;
+                curifiedContent.style.outline = '1px solid rgba(201,168,76,0.2)';
+                curifiedContent.style.padding = '8px';
+                curifiedContent.style.borderRadius = '0';
+                curifiedContent.addEventListener('input', function() {
+                    // Sync with state.tailoredResume – for demo we just log
+                    console.log('User edited curified content');
                 });
             }
 
-            // ─── NAVIGATION ───────────────────────────────────────────────
-            nextToExportBtn.addEventListener('click', function() {
-                SoundFX.pop(0.08, 600);
-                showPage('export');
-            });
-
-            // ─── EXPORT ────────────────────────────────────────────────────
-            function exportResume(format) {
-                const data = state.tailoredResume || state.originalResume;
-                if (!data) {
-                    SoundFX.error();
-                    alert('No resume to export. Please tailor first.');
+            // ─── Individual Curify buttons ──────────────────────────────────
+            curifySummaryBtn.addEventListener('click', function() {
+                if (!state.tailoredResume) {
+                    showToast('warning', '🐚 Tailor first', 'Click "Tailor Resume" first to generate a base.');
                     return;
                 }
-                SoundFX.giggle(0.1);
-                const content = JSON.stringify(data, null, 2);
-                const blob = new Blob([content], { type: 'text/plain' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = 'curvina-resume.' + (format === 'txt' ? 'txt' : 'json');
-                a.click();
-                URL.revokeObjectURL(a.href);
-                alert('Exported as ' + format.toUpperCase() + ' (demo). In production, we would generate proper DOCX/PDF.');
-            }
-
-            exportDocx.addEventListener('click', function() { exportResume('docx'); });
-            exportPdf.addEventListener('click', function() { exportResume('pdf'); });
-            exportHtml.addEventListener('click', function() { exportResume('html'); });
-            exportTxt.addEventListener('click', function() { exportResume('txt'); });
-
-            autoFillWorkday.addEventListener('click', function() {
-                SoundFX.giggle(0.12);
-                alert('🚀 Workday auto-fill is coming soon! CurVina will automatically populate your Workday application form with the tailored resume data.');
+                const current = state.tailoredResume.summary || '';
+                const newText = curifySection('summary', current);
+                state.tailoredResume.summary = newText;
+                renderOutput(state.originalResume, state.tailoredResume);
             });
 
-            // ─── PLAY DEMO FUNCTIONALITY ──────────────────────────────────
-            let demoRunning = false;
+            curifyExperienceBtn.addEventListener('click', function() {
+                if (!state.tailoredResume) {
+                    showToast('warning', '🐚 Tailor first', 'Click "Tailor Resume" first to generate a base.');
+                    return;
+                }
+                const exp = state.tailoredResume.experience || [];
+                exp.forEach(function(e, idx) {
+                    const achievementsStr = e.achievements ? e.achievements.join('\n') : '';
+                    const newAchievements = curifySection('experience', achievementsStr);
+                    state.tailoredResume.experience[idx].achievements = newAchievements;
+                });
+                renderOutput(state.originalResume, state.tailoredResume);
+            });
 
-            window.playDemo = function() {
-                if (demoRunning) return;
-                demoRunning = true;
+            curifySkillsBtn.addEventListener('click', function() {
+                if (!state.tailoredResume) {
+                    showToast('warning', '🐚 Tailor first', 'Click "Tailor Resume" first to generate a base.');
+                    return;
+                }
+                const skillsStr = state.tailoredResume.skills?.technical?.join(', ') || '';
+                const newSkills = curifySection('skills', skillsStr);
+                state.tailoredResume.skills.technical = newSkills.split(',').map(function(s) { return s.trim(); });
+                renderOutput(state.originalResume, state.tailoredResume);
+            });
+
+            curifyAllBtn.addEventListener('click', function() {
+                if (!state.tailoredResume) {
+                    showToast('warning', '🐚 Tailor first', 'Click "Tailor Resume" first to generate a base.');
+                    return;
+                }
+                // Re-run full tailor with current custom prompt
+                const original = state.originalResume;
+                const tailored = JSON.parse(JSON.stringify(original));
+
+                if (tailored.summary) {
+                    tailored.summary = mockCurify('summary', tailored.summary, state.jobDescription, getCustomPrompt());
+                }
+                if (tailored.experience) {
+                    tailored.experience.forEach(function(exp) {
+                        if (exp.achievements && exp.achievements.length > 0) {
+                            exp.achievements = mockCurify('experience', exp.achievements, state.jobDescription,
+                                getCustomPrompt());
+                        }
+                    });
+                }
+                if (tailored.skills && tailored.skills.technical) {
+                    const skillsStr = tailored.skills.technical.join(', ');
+                    const newSkills = mockCurify('skills', skillsStr, state.jobDescription, getCustomPrompt());
+                    tailored.skills.technical = newSkills.split(',').map(function(s) { return s.trim(); });
+                }
+
+                state.tailoredResume = tailored;
+                renderOutput(original, tailored);
+                showToast('success', '🐟 All Curified', 'All sections updated.');
+            });
+
+            // ================================================================
+            // 9. EXPORT FUNCTIONS
+            // ================================================================
+            function getResumeText() {
+                const data = state.tailoredResume || state.originalResume;
+                if (!data) {
+                    showToast('warning', '🐚 No resume', 'Please tailor a resume first.');
+                    return '';
+                }
+
+                let text = '';
+
+                // Personal Info
+                if (data.personalInfo) {
+                    const pi = data.personalInfo;
+                    if (pi.firstName || pi.lastName) text += (pi.firstName || '') + ' ' + (pi.lastName || '') + '\n';
+                    if (pi.email) text += 'Email: ' + pi.email + '\n';
+                    if (pi.phone) text += 'Phone: ' + pi.phone + '\n';
+                    if (pi.linkedin) text += 'LinkedIn: ' + pi.linkedin + '\n';
+                    text += '\n';
+                }
+
+                // Summary
+                if (data.summary) {
+                    text += 'SUMMARY\n' + data.summary + '\n\n';
+                }
+
+                // Experience
+                if (data.experience && data.experience.length > 0) {
+                    text += 'EXPERIENCE\n';
+                    data.experience.forEach(function(exp) {
+                        text += exp.title + ' at ' + exp.company + ' (' + (exp.startDate || '') + ' – ' + (exp
+                            .endDate || '') + ')\n';
+                        if (exp.achievements) {
+                            exp.achievements.forEach(function(ach) {
+                                text += '• ' + ach + '\n';
+                            });
+                        }
+                        text += '\n';
+                    });
+                }
+
+                // Skills
+                if (data.skills) {
+                    if (data.skills.technical && data.skills.technical.length > 0) {
+                        text += 'TECHNICAL SKILLS\n' + data.skills.technical.join(', ') + '\n\n';
+                    }
+                    if (data.skills.soft && data.skills.soft.length > 0) {
+                        text += 'SOFT SKILLS\n' + data.skills.soft.join(', ') + '\n\n';
+                    }
+                }
+
+                // Education
+                if (data.education && data.education.length > 0) {
+                    text += 'EDUCATION\n';
+                    data.education.forEach(function(edu) {
+                        text += edu.institution + ' – ' + (edu.degree || '') + ' (' + (edu.field || '') + ')\n';
+                        if (edu.graduationDate) text += 'Graduated: ' + edu.graduationDate + '\n';
+                    });
+                    text += '\n';
+                }
+
+                // Certifications
+                if (data.certifications && data.certifications.length > 0) {
+                    text += 'CERTIFICATIONS\n';
+                    data.certifications.forEach(function(cert) {
+                        text += cert.name + ' – ' + (cert.issuer || '') + ' (' + (cert.date || '') + ')\n';
+                    });
+                    text += '\n';
+                }
+
+                return text.trim();
+            }
+
+            function downloadFile(content, filename, mimeType) {
+                const blob = new Blob([content], { type: mimeType || 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            exportTxtBtn.addEventListener('click', function() {
+                const text = getResumeText();
+                if (!text) return;
+                downloadFile(text, 'curvina-resume.txt', 'text/plain');
+                showToast('success', '🐟 Exported', 'TXT file downloaded.');
+            });
+
+            exportHtmlBtn.addEventListener('click', function() {
+                const text = getResumeText();
+                if (!text) return;
+                const html = `<!DOCTYPE html>
+        <html>
+        <head><title>CurVina Resume</title>
+        <style>body{font-family:'Inter',sans-serif;max-width:800px;margin:40px auto;padding:20px;background:#fcf9f5;color:#1a2a3a;line-height:1.6;}h1{font-family:'Playfair Display',serif;color:#c9a84c;border-bottom:2px solid #c9a84c;padding-bottom:8px;}pre{white-space:pre-wrap;font-family:'Inter',monospace;font-size:0.9rem;}</style>
+        </head>
+        <body><h1>CurVina Resume</h1><pre>${text}</pre></body>
+        </html>`;
+                downloadFile(html, 'curvina-resume.html', 'text/html');
+                showToast('success', '🐟 Exported', 'HTML file downloaded.');
+            });
+
+            exportDocxBtn.addEventListener('click', function() {
+                showToast('info', '🪸 Coming soon', 'DOCX export will be available in Phase 1.');
+            });
+
+            exportPdfBtn.addEventListener('click', function() {
+                showToast('info', '🪸 Coming soon', 'PDF export will be available in Phase 1.');
+            });
+
+            workdayBtn.addEventListener('click', function() {
+                showToast('info', '🪸 Workday Auto‑Fill', 'This feature will automatically populate Workday forms in Phase 2.');
+            });
+
+            // ================================================================
+            // 10. PLAY DEMO
+            // ================================================================
+            playDemoBtn.addEventListener('click', function() {
+                if (state.isProcessing) {
+                    showToast('warning', '🐚 Busy', 'Please wait for the current operation to finish.');
+                    return;
+                }
+
+                setStatus('▶️ Starting demo...', true);
                 playDemoBtn.disabled = true;
-                demoStatus.textContent = '▶️ Starting demo...';
 
-                const sampleUrl = 'https://lseg.wd3.myworkdayjobs.com/en-US/Careers/job/IND-Hyderabad-CapitaLand/Senior-QA-Engineer-Python-with-Jmeter-_R0116074';
-                jobUrlInput.value = sampleUrl;
-                demoStatus.textContent = '⏳ Fetching job description...';
+                // Step 1: Load a sample job
+                const sampleJD = {
+                    company: 'LSEG (London Stock Exchange Group)',
+                    title: 'Senior QA Engineer (Functional QA)',
+                    description: 'Role Profile: We are looking for a Senior QA Engineer with strong Python and API testing experience. You will be responsible for designing and implementing test plans, building automation frameworks, and collaborating with cross-functional teams to ensure high quality deliverables. Experience with JMeter and Agile/Scrum methodologies is a plus.',
+                    requirements: ['Python', 'API Testing', 'JMeter', 'Agile/Scrum', '10+ years testing experience']
+                };
+
                 setTimeout(function() {
-                    fetchJobBtn.click();
-                    demoStatus.textContent = '✅ Job fetched!';
+                    loadJobDescription(sampleJD);
+                    jdPaste.value = sampleJD.description;
+                    setStatus('✅ Job loaded. Loading resume...', true);
+
+                    // Step 2: Load a sample resume
                     setTimeout(function() {
-                        const dummyFile = new File(['dummy'], 'resume.txt', { type: 'text/plain' });
-                        const resume = mockResumeParsing(dummyFile);
-                        handleResumeLoaded(resume);
-                        demoStatus.textContent = '✅ Resume loaded!';
+                        const sampleResume = {
+                            personalInfo: {
+                                firstName: 'Sai',
+                                lastName: 'Varakala',
+                                email: 'sai.varakala13@gmail.com',
+                                phone: '+91 8341277189',
+                                linkedin: 'https://linkedin.com/In/suryasticsai'
+                            },
+                            summary: 'Experienced QA Engineer and Scrum Master with 6+ years in the industry. Skilled in Java, Python, automation testing, and Agile methodologies. Passionate about delivering high-quality software through effective testing and collaboration.',
+                            experience: [{
+                                title: 'Senior QA Engineer',
+                                company: 'Tata Consultancy Services',
+                                location: 'Hyderabad',
+                                startDate: '2020-01',
+                                endDate: 'Present',
+                                achievements: [
+                                    'Represented 3 Scrum teams within a SAFe ART on JIRA, aligning Product Owners, Architects, RTE, and stakeholders on PI objectives.',
+                                    'Facilitated all Scrum and ART ceremonies with structured facilitation techniques, driving clarity, engagement, and delivery focus.',
+                                    'Introduced Sprint Card gamification and Zoom poll techniques, increasing team participation, transparency, and ownership.',
+                                    'Built JavaScript-based velocity calculators and capacity planning utilities embedded in Confluence, reducing manual effort.',
+                                    'Created advanced JQL Jira dashboards and Confluence boards for real-time reporting on velocity, spillover, and PI progress.'
+                                ]
+                            }, {
+                                title: 'Java Developer',
+                                company: 'Cigna Healthcare',
+                                location: 'USA',
+                                startDate: '2018-06',
+                                endDate: '2019-12',
+                                achievements: [
+                                    'Full Stack Java developer on a healthcare insurance modernization program, owning critical backend modules.',
+                                    'Partnered with QA Engineers and BAs to validate end-to-end business workflows and improve overall delivery quality.'
+                                ]
+                            }],
+                            skills: {
+                                technical: ['Python', 'Java', 'JavaScript', 'API Testing', 'JMeter', 'Agile/Scrum',
+                                    'JIRA', 'Confluence'
+                                ],
+                                soft: ['Leadership', 'Communication', 'Problem Solving', 'Team Collaboration']
+                            },
+                            education: [{ institution: 'JNTU Hyderabad', degree: 'B.Tech', field: 'Computer Science',
+                                graduationDate: '2018' }],
+                            certifications: [{ name: 'Certified Scrum Master', issuer: 'Scrum Alliance',
+                                date: '2021' }]
+                        };
+                        loadResume(sampleResume);
+                        setStatus('✅ Resume loaded. Tailoring...', true);
+
+                        // Step 3: Auto-tailor
                         setTimeout(function() {
-                            demoStatus.textContent = '⏳ Rendering comparison panel...';
-                            renderComparisonPanel();
-                            demoStatus.textContent = '✅ Ready! Use the Curify buttons to tailor specific sections.';
-                            demoRunning = false;
+                            // Simulate tailor click
+                            tailorBtn.click();
+                            setStatus('✅ Demo complete! Review your tailored resume below.', false);
                             playDemoBtn.disabled = false;
-                        }, 500);
-                    }, 1200);
-                }, 800);
+                            showToast('success', '🧜‍♀️ Demo Complete', 'CurVina has tailored your resume. Review and export.');
+                        }, 800);
+                    }, 600);
+                }, 600);
+            });
+
+            // ================================================================
+            // 11. CLEAR ALL
+            // ================================================================
+            clearBtn.addEventListener('click', function() {
+                if (state.isProcessing) {
+                    showToast('warning', '🐚 Busy', 'Please wait for the current operation to finish.');
+                    return;
+                }
+                if (!confirm('Clear all data? This cannot be undone.')) return;
+
+                state.jobDescription = null;
+                state.originalResume = null;
+                state.tailoredResume = null;
+
+                jdPreview.classList.add('hidden');
+                resumePreview.classList.add('hidden');
+                jdInput.value = '';
+                jdPaste.value = '';
+                jdFileInput.value = '';
+                resumeFileInput.value = '';
+                resumeGistInput.value = '';
+                originalContent.textContent = 'No resume loaded yet.';
+                curifiedContent.textContent = 'Tailor your resume to see results.';
+                curifiedContent.contentEditable = false;
+                curifiedContent.style.outline = 'none';
+                curifiedContent.style.padding = '0';
+
+                updateTailorButton();
+                setStatus('✨ Cleared. Ready to start fresh.', false);
+                showToast('info', '🐠 Cleared', 'All data has been reset.');
+            });
+
+            // ================================================================
+            // 12. CUSTOM PROMPT TOGGLE
+            // ================================================================
+            customPromptToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    customPromptInput.classList.remove('hidden');
+                } else {
+                    customPromptInput.classList.add('hidden');
+                }
+            });
+
+            // ================================================================
+            // 13. INIT
+            // ================================================================
+            function init() {
+                const engineOk = initEngine();
+                if (!engineOk) {
+                    showToast('error', '🪼 Init Error', 'RAGina failed to initialize. Check console.');
+                    return;
+                }
+                updateTailorButton();
+                setStatus('🧜‍♀️ CurVina ready. Load a job and your resume to begin.', false);
+                showToast('info', '🐠 Welcome', 'CurVina Phase 0 – Letterhead prototype loaded.');
+                console.log('🧜‍♀️ CurVina Phase 0 ready');
+            }
+
+            // Run on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+            // Expose some functions for console debugging
+            window.__curvina = {
+                state: state,
+                loadJob: loadJobDescription,
+                loadResume: loadResume,
+                curify: curifySection,
+                getResumeText: getResumeText,
+                showToast: showToast
             };
 
-            // ─── INIT ──────────────────────────────────────────────────────
-            updateTailorButton();
-            showPage('home');
-
-            console.log('🧜‍♀️ CurVina — Enhanced with Curify Buttons and Comparison Panel!');
         })();
     </script>
+
 </body>
 </html>
