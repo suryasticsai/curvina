@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CurVina — Resume Content Generator</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="curvina-logo.png" />
+    <link rel="apple-touch-icon" href="curvina-logo.png" />
+
     <!-- RAGina.js -->
     <script src="https://cdn.jsdelivr.net/gh/suryasticsai/RAGina@main/ragina.js">
     </script>
@@ -44,16 +48,21 @@
             margin-bottom: 24px;
         }
         .crest {
-            width: 64px; height: 64px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             background: linear-gradient(145deg, #1a2a3a, #0a1f2b);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            color: #c9a84c;
             box-shadow: 0 0 0 2px rgba(201,168,76,0.15), 0 4px 12px rgba(0,0,0,0.08);
             flex-shrink: 0;
+            overflow: hidden;
+        }
+        .crest img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .title-block h1 {
             font-family: 'Playfair Display', serif;
@@ -71,6 +80,57 @@
             gap: 8px;
         }
         .title-block .sub i { color: #c9a84c; }
+
+        /* Collapsible JD card */
+        .jd-collapsible {
+            margin-top: 16px;
+        }
+        .jd-collapsible .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #8a9aaa;
+            padding: 4px 0;
+            user-select: none;
+        }
+        .jd-collapsible .toggle-label i {
+            transition: transform 0.3s;
+        }
+        .jd-collapsible .toggle-label .arrow {
+            transition: transform 0.3s;
+            display: inline-block;
+        }
+        .jd-collapsible .toggle-label .arrow.open {
+            transform: rotate(90deg);
+        }
+        .jd-collapsible .jd-content {
+            display: none;
+            margin-top: 8px;
+        }
+        .jd-collapsible .jd-content.open {
+            display: block;
+        }
+
+        /* Console toggle */
+        .console-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .console-toggle input[type="checkbox"] {
+            accent-color: #c9a84c;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .console-toggle label {
+            font-size: 0.8rem;
+            color: #6a7a8a;
+            cursor: pointer;
+        }
 
         .input-row {
             display: flex;
@@ -158,6 +218,10 @@
         }
         .btn-fetch-info:hover { background: linear-gradient(145deg, #00a381, #00856a); transform: scale(1.02); }
         .btn-fetch-info:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-danger { background: #ff6b6b; color: #fff; }
+        .btn-danger:hover { background: #e55a5a; transform: scale(1.02); }
+        .btn-save { background: #fdcb6e; color: #0a1f2b; }
+        .btn-save:hover { background: #fdcb6e; transform: scale(1.02); }
 
         .action-bar {
             display: flex;
@@ -423,6 +487,7 @@
             text-align: center;
         }
 
+        /* ─── Log area ─── */
         .log-area {
             background: #1a1a1a;
             color: #d0d8e0;
@@ -435,6 +500,9 @@
             margin-top: 16px;
             white-space: pre-wrap;
             word-break: break-all;
+        }
+        .log-area.hidden-log {
+            display: none;
         }
         .log-area .log-entry {
             padding: 2px 0;
@@ -516,6 +584,65 @@
             margin-left: 8px;
         }
 
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 6px;
+        }
+        .form-actions .btn {
+            padding: 4px 14px;
+            font-size: 0.7rem;
+        }
+
+        /* ─── Footer ─── */
+        .app-footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(201,168,76,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: #8a9aaa;
+        }
+        .app-footer .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #5a6a7a;
+            text-decoration: none;
+        }
+        .app-footer .footer-brand img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+        .app-footer .footer-brand:hover {
+            color: #1a2a3a;
+        }
+        .app-footer .footer-links {
+            display: flex;
+            gap: 16px;
+        }
+        .app-footer .footer-links a {
+            color: #8a9aaa;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.75rem;
+        }
+        .app-footer .footer-links a:hover {
+            color: #c9a84c;
+        }
+        .app-footer .footer-copy {
+            font-size: 0.7rem;
+            color: #aab5c0;
+        }
+
         @media (max-width: 700px) {
             .letterhead { padding: 20px 16px; }
             .letterhead::after { left: 16px; right: 16px; }
@@ -530,6 +657,7 @@
             .section-actions .btn { font-size: 0.65rem; padding: 3px 10px; }
             .section-actions .custom-prompt-input { font-size: 0.75rem; }
             .toggle-paste-row { flex-direction: column; }
+            .app-footer { flex-direction: column; align-items: center; text-align: center; }
         }
 
         ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -544,7 +672,9 @@
 
             <!-- HEADER -->
             <div class="header">
-                <div class="crest"><i class="fas fa-fish"></i></div>
+                <div class="crest">
+                    <img src="curvina-logo.png" alt="CurVina Logo" />
+                </div>
                 <div class="title-block">
                     <h1>Cur<span>Vina</span></h1>
                     <div class="sub"><i class="fas fa-water"></i> Resume Content Generator <i class="fas fa-water"></i></div>
@@ -565,6 +695,19 @@
                 <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
                     <button class="btn" id="usePastedJdBtn"><i class="fas fa-check"></i> Use This JD</button>
                     <button class="btn btn-secondary" id="cancelPasteJdBtn"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </div>
+
+            <!-- Collapsible JD Display -->
+            <div class="jd-collapsible">
+                <div class="toggle-label" id="jdToggleLabel">
+                    <i class="fas fa-chevron-right arrow" id="jdArrow"></i>
+                    <span>Show Job Description</span>
+                </div>
+                <div class="jd-content" id="jdContent">
+                    <div id="jdContainer">
+                        <div style="color:#8a9aaa; font-style:italic; padding:20px 0; text-align:center;">No job description loaded yet.</div>
+                    </div>
                 </div>
             </div>
 
@@ -590,9 +733,15 @@
                     <span style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; color:#8a9aaa; font-weight:600;">
                         <i class="fas fa-user-edit"></i> Your Resume (Editable)
                     </span>
-                    <div style="display:flex; gap:6px; margin-left:auto;">
+                    <div style="display:flex; gap:6px; margin-left:auto; flex-wrap:wrap;">
                         <button class="btn btn-fetch-info" id="fetchPersonalInfoBtn" title="Use AI to extract and fill all fields from your resume">
                             <i class="fas fa-magic"></i> Fetch Personal Info
+                        </button>
+                        <button class="btn btn-save" id="saveResumeBtn" title="Save the current resume data to localStorage">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="btn btn-danger" id="clearResumeBtn" title="Clear all resume form fields">
+                            <i class="fas fa-trash-alt"></i> Clear
                         </button>
                         <button class="btn btn-secondary" id="toggleResumePreviewBtn" style="padding:4px 12px; font-size:0.7rem;">
                             <i class="fas fa-eye"></i> Hide
@@ -600,6 +749,9 @@
                     </div>
                 </div>
                 <div id="resumePreviewGrid" class="resume-preview-grid"></div>
+                <div class="form-actions" style="margin-top:12px; padding-top:8px; border-top:1px solid rgba(0,0,0,0.04);">
+                    <span style="font-size:0.7rem; color:#8a9aaa;"><i class="fas fa-info-circle"></i> All fields are editable. Click "Fetch Personal Info" to auto-fill from your resume.</span>
+                </div>
             </div>
 
             <!-- ACTIONS -->
@@ -622,11 +774,6 @@
                 <span class="retry-text" id="retryText"></span>
             </div>
 
-            <!-- JD DISPLAY -->
-            <div id="jdContainer">
-                <div style="color:#8a9aaa; font-style:italic; padding:20px 0; text-align:center;">No job description loaded yet.</div>
-            </div>
-
             <!-- GENERATED CONTENT -->
             <div id="contentContainer" style="display:none;">
                 <div style="display:flex; align-items:center; gap:12px; margin-top:24px; border-bottom:1px solid rgba(0,0,0,0.04); padding-bottom:8px;">
@@ -642,13 +789,36 @@
                 <div id="sectionsContainer" class="section-grid"></div>
             </div>
 
+            <!-- Console toggle -->
+            <div class="console-toggle">
+                <input type="checkbox" id="consoleToggle" />
+                <label for="consoleToggle">Show Console Log</label>
+            </div>
+
+            <!-- LOG -->
+            <div class="log-area hidden-log" id="logArea">
+                <div class="log-entry"><span class="time">[init]</span> <span class="level info">INFO</span> CurVina Content Generator ready.</div>
+            </div>
+
             <!-- DEBUG -->
             <div id="debugContainer" style="margin-top:16px;"></div>
 
-            <!-- LOG -->
-            <div class="log-area" id="logArea">
-                <div class="log-entry"><span class="time">[init]</span> <span class="level info">INFO</span> CurVina Content Generator ready.</div>
-            </div>
+            <!-- FOOTER -->
+            <footer class="app-footer">
+                <a href="#" class="footer-brand" onclick="showPage('home')">
+                    <img src="curvina-logo.png" alt="CurVina Logo" style="width:28px; height:28px; object-fit:contain;" />
+                    CurVina
+                    <span style="font-weight:300; color:#8a9aaa; font-size:0.75rem;">— swim the ocean of opportunities</span>
+                </a>
+                <div class="footer-copy">
+                    &copy; 2026 CurVina &bull; Built with <i class="fas fa-heart" style="color:#ff6b6b;font-size:0.7rem;"></i> by suryasticsai
+                </div>
+                <div class="footer-links">
+                    <a href="#" onclick="showToast('info', '🐚 About CurVina', 'AI-powered resume tailor with RAGina.')">About</a>
+                    <a href="https://github.com/suryasticsai" target="_blank">GitHub</a>
+                    <a href="#" onclick="showToast('info', '🪸 Help', 'Upload a JD and your resume, then click Generate.')">Help</a>
+                </div>
+            </footer>
 
         </div>
     </div>
@@ -852,6 +1022,25 @@
             const toggleResumePreviewBtn = document.getElementById('toggleResumePreviewBtn');
             const fetchFailSuggestion = document.getElementById('fetchFailSuggestion');
             const fetchPersonalInfoBtn = document.getElementById('fetchPersonalInfoBtn');
+            const saveResumeBtn = document.getElementById('saveResumeBtn');
+            const clearResumeBtn = document.getElementById('clearResumeBtn');
+            const consoleToggle = document.getElementById('consoleToggle');
+            const jdToggleLabel = document.getElementById('jdToggleLabel');
+            const jdContent = document.getElementById('jdContent');
+            const jdArrow = document.getElementById('jdArrow');
+
+            // ─── Console toggle ──────────────────────────────────────────
+            consoleToggle.addEventListener('change', function() {
+                logArea.classList.toggle('hidden-log', !this.checked);
+            });
+
+            // ─── JD Collapsible ─────────────────────────────────────────
+            let jdOpen = false;
+            jdToggleLabel.addEventListener('click', function() {
+                jdOpen = !jdOpen;
+                jdContent.classList.toggle('open', jdOpen);
+                jdArrow.classList.toggle('open', jdOpen);
+            });
 
             // ─── STATE ──────────────────────────────────────────────────
             const state = {
@@ -1180,77 +1369,8 @@
                 jdContainer.innerHTML = html;
             }
 
-            // ─── LLM-BASED RESUME PARSER ───────────────────────────────────
-            async function parseResumeWithLLM(text) {
-                const prompt = `
-        You are a resume parser. Extract the following information from the resume text and output a JSON object.
-
-        Resume text:
-        ${text}
-
-        Extract:
-        - fullName: the full name of the person.
-        - email: email address.
-        - phone: phone number.
-        - location: city/state/country.
-        - linkedin: LinkedIn URL.
-        - github: GitHub URL.
-        - summary: a short professional summary (if any).
-        - skills: a comma-separated string of skills (or list).
-        - experience: an array of experience objects with fields: title, company, location, dates, bullets (array of bullet points).
-        - education: a string or array of education details.
-        - certifications: a string or array of certifications.
-        - projects: an array of project descriptions.
-
-        Output ONLY the JSON object, no additional text.
-        `;
-                try {
-                    const result = await window.askLLM(prompt, 'openai', []);
-                    const jsonMatch = result.match(/\{[\s\S]*\}/);
-                    if (jsonMatch) {
-                        const parsed = JSON.parse(jsonMatch[0]);
-                        // Ensure arrays and fields exist
-                        if (!parsed.experience) parsed.experience = [];
-                        if (!parsed.projects) parsed.projects = [];
-                        if (!parsed.skills) parsed.skills = '';
-                        if (!parsed.summary) parsed.summary = '';
-                        if (!parsed.education) parsed.education = '';
-                        if (!parsed.certifications) parsed.certifications = '';
-                        if (!parsed.personalInfo) {
-                            parsed.personalInfo = {
-                                fullName: parsed.fullName || '',
-                                email: parsed.email || '',
-                                phone: parsed.phone || '',
-                                location: parsed.location || '',
-                                linkedin: parsed.linkedin || '',
-                                github: parsed.github || '',
-                            };
-                        }
-                        // Convert experience bullets to arrays if they are strings
-                        parsed.experience = parsed.experience.map(exp => {
-                            if (typeof exp.bullets === 'string') {
-                                exp.bullets = exp.bullets.split('\n').filter(b => b.trim());
-                            }
-                            if (!exp.bullets) exp.bullets = [];
-                            return exp;
-                        });
-                        // Ensure projects is array
-                        if (typeof parsed.projects === 'string') {
-                            parsed.projects = parsed.projects.split('\n').filter(p => p.trim());
-                        }
-                        // education and certifications: if string, keep as string; we'll render in textarea.
-                        return parsed;
-                    } else {
-                        return null;
-                    }
-                } catch (e) {
-                    console.error('LLM parse error:', e);
-                    return null;
-                }
-            }
-
-            // ─── ROBUST FALLBACK RESUME PARSER (from earlier) ──────────
-            function structureResumeFromText(text) {
+            // ─── SIMPLE RESUME PARSER (NO LLM) ──────────────────────────
+            function parseResumeSimple(text) {
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
                 const resume = {
                     personalInfo: { fullName: '', email: '', phone: '', location: '', linkedin: '', github: '' },
@@ -1262,168 +1382,112 @@
                     projects: []
                 };
 
-                // Helper to extract personal info from first few lines
-                const firstTen = lines.slice(0, 10).join(' ');
-                const emailMatch = firstTen.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-                if (emailMatch) resume.personalInfo.email = emailMatch[0];
-                const phoneMatch = firstTen.match(/\+?[\d\s\-()]{8,}/);
-                if (phoneMatch) resume.personalInfo.phone = phoneMatch[0];
-                const nameMatch = firstTen.match(/^([A-Z][a-z]+)\s+([A-Z][a-z]+)/);
-                if (nameMatch) resume.personalInfo.fullName = nameMatch[0];
-                const linkedinMatch = text.match(/linkedin\.com\/in\/[a-zA-Z0-9\-]+/i);
-                if (linkedinMatch) resume.personalInfo.linkedin = linkedinMatch[0];
-                const githubMatch = text.match(/github\.com\/[a-zA-Z0-9\-]+/i);
-                if (githubMatch) resume.personalInfo.github = githubMatch[0];
-                const locMatch = text.match(/(Hyderabad|Bangalore|Mumbai|Delhi|Chennai|Pune|India)/i);
-                if (locMatch) resume.personalInfo.location = locMatch[0];
-
-                // Parse sections
-                let currentSection = null;
-                let currentExp = null;
-                let expBullets = [];
-                let expTitle = '';
-                let expCompany = '';
-                let expLocation = '';
-                let expDates = '';
-
-                for (let i = 0; i < lines.length; i++) {
+                // Extract name (first non-empty line that looks like a name)
+                let nameFound = false;
+                for (let i = 0; i < Math.min(lines.length, 20); i++) {
                     const line = lines[i];
-                    const lower = line.toLowerCase();
-
-                    // Detect section headers (## or plain)
-                    const isHeader = line.startsWith('##') || (line.length > 3 && line === line.toUpperCase() && !line.includes(' '));
-                    const headerText = line.replace(/^##\s*/, '').trim();
-
-                    if (isHeader || line.match(/^[A-Z][A-Z\s]+$/)) {
-                        const sectionName = headerText || line.trim();
-                        if (sectionName.includes('Professional Summary') || sectionName.includes('SUMMARY')) {
-                            currentSection = 'summary';
-                            continue;
-                        } else if (sectionName.includes('Core Skills') || sectionName.includes('SKILLS')) {
-                            currentSection = 'skills';
-                            continue;
-                        } else if (sectionName.includes('Professional Experience') || sectionName.includes('EXPERIENCE')) {
-                            currentSection = 'experience';
-                            // End any pending experience
-                            if (currentExp) {
-                                resume.experience.push({ ...currentExp, bullets: expBullets });
-                                currentExp = null;
-                                expBullets = [];
-                            }
-                            continue;
-                        } else if (sectionName.includes('EDUCATION')) {
-                            currentSection = 'education';
-                            continue;
-                        } else if (sectionName.includes('CERTIFICATIONS') || sectionName.includes('CERTIF')) {
-                            currentSection = 'certifications';
-                            continue;
-                        } else if (sectionName.includes('PROJECTS') || sectionName.includes('AI Productivity Tools')) {
-                            currentSection = 'projects';
-                            continue;
-                        } else if (sectionName.includes('LEADERSHIP') || sectionName.includes('ANALYSIS')) {
-                            // This can be appended to summary or projects, we'll add to projects for now
-                            currentSection = 'projects';
-                            continue;
-                        } else if (sectionName.includes('TOOLS & PLATFORMS')) {
-                            // This is skills-related, append to skills
-                            currentSection = 'skills';
-                            continue;
-                        } else {
-                            // If it's an experience sub-header (job title)
-                            if (currentSection === 'experience') {
-                                // Save previous experience
-                                if (currentExp) {
-                                    resume.experience.push({ ...currentExp, bullets: expBullets });
-                                }
-                                // Start new experience
-                                const title = sectionName;
-                                let company = '';
-                                let location = '';
-                                let dates = '';
-                                // Try to extract company from title
-                                const atIndex = title.indexOf(' at ');
-                                if (atIndex !== -1) {
-                                    company = title.substring(atIndex + 4).trim();
-                                    // Keep title without " at ..."
-                                    expTitle = title.substring(0, atIndex).trim();
-                                } else {
-                                    expTitle = title;
-                                    company = '';
-                                }
-                                // Try to find location and dates from next lines
-                                // We'll gather later
-                                currentExp = {
-                                    title: expTitle,
-                                    company: company,
-                                    location: '',
-                                    dates: ''
-                                };
-                                expBullets = [];
-                                continue;
-                            }
-                        }
+                    // Look for two words with capitals (likely a name)
+                    if (line.match(/^[A-Z][a-z]+\s+[A-Z][a-z]+/)) {
+                        resume.personalInfo.fullName = line;
+                        nameFound = true;
+                        break;
                     }
-
-                    // If we are in a section, collect content
-                    if (currentSection === 'summary') {
-                        resume.summary += (resume.summary ? ' ' : '') + line;
-                    } else if (currentSection === 'skills') {
-                        // Append to skills, remove any extra commas
-                        resume.skills += (resume.skills ? ', ' : '') + line;
-                    } else if (currentSection === 'education') {
-                        resume.education += (resume.education ? '\n' : '') + line;
-                    } else if (currentSection === 'certifications') {
-                        resume.certifications += (resume.certifications ? '\n' : '') + line;
-                    } else if (currentSection === 'projects') {
-                        // If it looks like a project line (starts with dash or bullet)
-                        const projectLine = line.replace(/^[•\-–]\s*/, '');
-                        if (projectLine.length > 3) {
-                            resume.projects.push(projectLine);
-                        } else if (line.length > 3 && !line.startsWith('##') && !line.startsWith('=')) {
-                            resume.projects.push(line);
-                        }
-                    } else if (currentSection === 'experience') {
-                        // Check if this line is a sub-title (like location and dates)
-                        if (line.includes('|') && (line.includes('202') || line.includes('Present'))) {
-                            // This is location and dates
-                            const parts = line.split('|').map(p => p.trim());
-                            if (parts.length >= 2) {
-                                if (currentExp) {
-                                    currentExp.location = parts[0] || '';
-                                    currentExp.dates = parts[1] || '';
-                                }
-                            }
-                            // If it's just dates without location
-                            if (line.match(/\d{4}/)) {
-                                if (currentExp && !currentExp.dates) {
-                                    currentExp.dates = line;
-                                }
-                            }
-                        } else if (line.startsWith('•') || line.startsWith('-') || line.startsWith('–')) {
-                            // Bullet point
-                            expBullets.push(line.replace(/^[•\-–]\s*/, ''));
-                        } else if (line.length > 3 && !line.startsWith('##') && !line.startsWith('=')) {
-                            // Might be a continuation of a job title or company info
-                            if (currentExp && !currentExp.company) {
-                                currentExp.company = line;
-                            } else {
-                                // Otherwise treat as a bullet if it doesn't look like a header
-                                if (!line.match(/^[A-Z][a-z]/) || line.length < 60) {
-                                    expBullets.push(line);
-                                }
-                            }
+                }
+                // If not found, take the first line that is not all caps (not a section header)
+                if (!nameFound) {
+                    for (let i = 0; i < Math.min(lines.length, 10); i++) {
+                        const line = lines[i];
+                        if (line.length > 3 && !line.match(/^[A-Z][A-Z\s]+$/)) {
+                            resume.personalInfo.fullName = line;
+                            break;
                         }
                     }
                 }
 
-                // Add last experience
+                // Extract email
+                const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+                if (emailMatch) resume.personalInfo.email = emailMatch[0];
+                // Extract phone
+                const phoneMatch = text.match(/\+?[\d\s\-()]{8,}/);
+                if (phoneMatch) resume.personalInfo.phone = phoneMatch[0];
+                // LinkedIn
+                const linkedinMatch = text.match(/linkedin\.com\/in\/[a-zA-Z0-9\-]+/i);
+                if (linkedinMatch) resume.personalInfo.linkedin = linkedinMatch[0];
+                // GitHub
+                const githubMatch = text.match(/github\.com\/[a-zA-Z0-9\-]+/i);
+                if (githubMatch) resume.personalInfo.github = githubMatch[0];
+                // Location
+                const locMatch = text.match(/(Hyderabad|Bangalore|Mumbai|Delhi|Chennai|Pune|India)/i);
+                if (locMatch) resume.personalInfo.location = locMatch[0];
+
+                // Find sections
+                let currentSection = 'summary';
+                let currentExp = null;
+                let expBullets = [];
+
+                for (const line of lines) {
+                    const lower = line.toLowerCase();
+                    if (lower.includes('summary') || lower.includes('profile')) {
+                        currentSection = 'summary';
+                        continue;
+                    } else if (lower.includes('experience') || lower.includes('work') || lower.includes('employment')) {
+                        currentSection = 'experience';
+                        if (currentExp) {
+                            resume.experience.push({ ...currentExp, bullets: expBullets });
+                            currentExp = null;
+                            expBullets = [];
+                        }
+                        continue;
+                    } else if (lower.includes('skill') || lower.includes('competencies')) {
+                        currentSection = 'skills';
+                        continue;
+                    } else if (lower.includes('education')) {
+                        currentSection = 'education';
+                        continue;
+                    } else if (lower.includes('certif')) {
+                        currentSection = 'certifications';
+                        continue;
+                    } else if (lower.includes('project')) {
+                        currentSection = 'projects';
+                        continue;
+                    } else {
+                        if (currentSection === 'summary') {
+                            resume.summary += (resume.summary ? ' ' : '') + line;
+                        } else if (currentSection === 'skills') {
+                            resume.skills += (resume.skills ? ', ' : '') + line;
+                        } else if (currentSection === 'education') {
+                            resume.education += (resume.education ? '\n' : '') + line;
+                        } else if (currentSection === 'certifications') {
+                            resume.certifications += (resume.certifications ? '\n' : '') + line;
+                        } else if (currentSection === 'projects') {
+                            const projectLine = line.replace(/^[•\-–]\s*/, '');
+                            if (projectLine.length > 3) {
+                                resume.projects.push(projectLine);
+                            }
+                        } else if (currentSection === 'experience') {
+                            if (line.match(/^[A-Za-z ]{3,} at /) || (line.length < 60 && line.match(/^[A-Z]/))) {
+                                if (currentExp) {
+                                    resume.experience.push({ ...currentExp, bullets: expBullets });
+                                }
+                                const parts = line.split(' at ');
+                                const title = parts[0].trim();
+                                const company = parts[1] ? parts[1].trim() : '';
+                                currentExp = { title, company, location: '', dates: '' };
+                                expBullets = [];
+                            } else if (line.startsWith('•') || line.startsWith('-') || line.startsWith('–')) {
+                                expBullets.push(line.replace(/^[•\-–]\s*/, ''));
+                            } else if (line.length > 3 && currentExp) {
+                                expBullets.push(line);
+                            }
+                        }
+                    }
+                }
                 if (currentExp) {
                     resume.experience.push({ ...currentExp, bullets: expBullets });
                 }
 
-                // Clean up skills: remove extra commas and spaces
+                // Clean skills
                 resume.skills = resume.skills.replace(/,\s*,/g, ',').replace(/^[, ]+/, '').replace(/[, ]+$/, '');
-                // If skills is empty, try to extract from "Tools & Platforms" section
                 if (!resume.skills) {
                     const toolsMatch = text.match(/TOOLS & PLATFORMS([\s\S]*?)(?=\n##|\n$)/);
                     if (toolsMatch) {
@@ -1431,13 +1495,124 @@
                     }
                 }
 
-                // If summary is empty, create a generic one from experience
                 if (!resume.summary && resume.experience.length > 0) {
                     const firstExp = resume.experience[0];
-                    resume.summary = `Experienced ${firstExp.title || 'professional'} with a background in ${resume.skills || 'technology'}. Proven track record of delivering results.`;
+                    resume.summary = `Experienced ${firstExp.title || 'professional'} with a background in ${resume.skills || 'technology'}.`;
                 }
 
                 return resume;
+            }
+
+            // ─── FILL FORM FIELDS ──────────────────────────────────────
+            function fillFormFields(structured) {
+                const fields = state._resumePreviewFields;
+                if (!fields) {
+                    log('⚠️ Form fields not initialized.', 'warn');
+                    return;
+                }
+
+                const pi = structured.personalInfo || {};
+                if (fields.fullName) fields.fullName.value = pi.fullName || '';
+                if (fields.email) fields.email.value = pi.email || '';
+                if (fields.phone) fields.phone.value = pi.phone || '';
+                if (fields.location) fields.location.value = pi.location || '';
+                if (fields.linkedin) fields.linkedin.value = pi.linkedin || '';
+                if (fields.github) fields.github.value = pi.github || '';
+                if (fields.summary) fields.summary.value = structured.summary || '';
+                if (fields.skills) fields.skills.value = structured.skills || '';
+                if (fields.education) fields.education.value = structured.education || '';
+                if (fields.certifications) fields.certifications.value = structured.certifications || '';
+                if (fields.projects) fields.projects.value = (structured.projects || []).join('\n') || '';
+
+                // Experience
+                const expContainer = document.getElementById('resume-experience-container');
+                if (expContainer) {
+                    const items = expContainer.querySelectorAll('.field-group');
+                    const experiences = structured.experience || [];
+                    if (items.length === 0 && experiences.length > 0) {
+                        // We need to rebuild experience container
+                        // For simplicity, we'll rebuild the entire preview grid
+                        renderResumePreview(structured);
+                        // Re-fetch fields
+                        state._resumePreviewFields = {
+                            fullName: document.getElementById('resume-fullname'),
+                            email: document.getElementById('resume-email'),
+                            phone: document.getElementById('resume-phone'),
+                            location: document.getElementById('resume-location'),
+                            linkedin: document.getElementById('resume-linkedin'),
+                            github: document.getElementById('resume-github'),
+                            summary: document.getElementById('resume-summary'),
+                            skills: document.getElementById('resume-skills'),
+                            education: document.getElementById('resume-education'),
+                            certifications: document.getElementById('resume-certifications'),
+                            projects: document.getElementById('resume-projects'),
+                        };
+                        // Recursive call to fill again after rebuild
+                        fillFormFields(structured);
+                        return;
+                    }
+                    items.forEach((item, idx) => {
+                        const exp = experiences[idx] || {};
+                        const title = item.querySelector(`#resume-exp-title-${idx}`);
+                        const company = item.querySelector(`#resume-exp-company-${idx}`);
+                        const location = item.querySelector(`#resume-exp-location-${idx}`);
+                        const dates = item.querySelector(`#resume-exp-dates-${idx}`);
+                        const bullets = item.querySelector(`#resume-exp-bullets-${idx}`);
+                        if (title) title.value = exp.title || '';
+                        if (company) company.value = exp.company || '';
+                        if (location) location.value = exp.location || '';
+                        if (dates) dates.value = exp.dates || '';
+                        if (bullets) bullets.value = (exp.bullets || []).join('\n') || '';
+                    });
+                }
+            }
+
+            // ─── FETCH PERSONAL INFO ──────────────────────────────────────
+            async function fetchPersonalInfo() {
+                if (!state.resumeText || state.resumeText.length < 50) {
+                    log('⚠️ No resume text available. Please upload a resume first.', 'warn');
+                    return;
+                }
+
+                fetchPersonalInfoBtn.disabled = true;
+                fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Parsing...';
+
+                try {
+                    // Use simple parser directly (no LLM) to be reliable
+                    const parsed = parseResumeSimple(state.resumeText);
+                    if (parsed) {
+                        state.resumeStructured = parsed;
+                        // Ensure we have a personalInfo object
+                        if (!parsed.personalInfo) {
+                            parsed.personalInfo = {
+                                fullName: parsed.fullName || '',
+                                email: parsed.email || '',
+                                phone: parsed.phone || '',
+                                location: parsed.location || '',
+                                linkedin: parsed.linkedin || '',
+                                github: parsed.github || '',
+                            };
+                        }
+                        // Render preview with parsed data
+                        renderResumePreview(parsed);
+                        // Fill the form fields
+                        fillFormFields(parsed);
+                        log('✅ Personal info fetched and filled successfully!', 'success');
+                        fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-check"></i> Fetched!';
+                        setTimeout(() => {
+                            fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
+                            fetchPersonalInfoBtn.disabled = false;
+                        }, 2000);
+                    } else {
+                        log('❌ Failed to parse resume.', 'error');
+                        fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
+                        fetchPersonalInfoBtn.disabled = false;
+                    }
+                } catch (e) {
+                    log('❌ Error fetching personal info: ' + e.message, 'error');
+                    fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
+                    fetchPersonalInfoBtn.disabled = false;
+                }
             }
 
             // ─── RENDER RESUME PREVIEW (Editable) ──────────────────────
@@ -1574,124 +1749,120 @@
                     projects: document.getElementById('resume-projects'),
                 };
 
-                // Enable the Fetch Personal Info button when resume is rendered
                 fetchPersonalInfoBtn.disabled = false;
             }
 
-            // ─── FETCH PERSONAL INFO ──────────────────────────────────────
-            async function fetchPersonalInfo() {
-                if (!state.resumeText || state.resumeText.length < 50) {
-                    log('⚠️ No resume text available. Please upload a resume first.', 'warn');
+            // ─── SAVE RESUME DATA ──────────────────────────────────────────
+            function saveResumeData() {
+                const fields = state._resumePreviewFields;
+                if (!fields) {
+                    log('⚠️ No resume data to save.', 'warn');
                     return;
                 }
 
-                fetchPersonalInfoBtn.disabled = true;
-                fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Parsing...';
+                const data = {
+                    personalInfo: {
+                        fullName: fields.fullName ? fields.fullName.value : '',
+                        email: fields.email ? fields.email.value : '',
+                        phone: fields.phone ? fields.phone.value : '',
+                        location: fields.location ? fields.location.value : '',
+                        linkedin: fields.linkedin ? fields.linkedin.value : '',
+                        github: fields.github ? fields.github.value : '',
+                    },
+                    summary: fields.summary ? fields.summary.value : '',
+                    skills: fields.skills ? fields.skills.value : '',
+                    education: fields.education ? fields.education.value : '',
+                    certifications: fields.certifications ? fields.certifications.value : '',
+                    projects: fields.projects ? fields.projects.value.split('\n').filter(l => l.trim()) : [],
+                    experience: []
+                };
+
+                const expContainer = document.getElementById('resume-experience-container');
+                if (expContainer) {
+                    const items = expContainer.querySelectorAll('.field-group');
+                    items.forEach((item, idx) => {
+                        const title = item.querySelector(`#resume-exp-title-${idx}`);
+                        const company = item.querySelector(`#resume-exp-company-${idx}`);
+                        const location = item.querySelector(`#resume-exp-location-${idx}`);
+                        const dates = item.querySelector(`#resume-exp-dates-${idx}`);
+                        const bullets = item.querySelector(`#resume-exp-bullets-${idx}`);
+                        if (title || company) {
+                            data.experience.push({
+                                title: title ? title.value : '',
+                                company: company ? company.value : '',
+                                location: location ? location.value : '',
+                                dates: dates ? dates.value : '',
+                                bullets: bullets ? bullets.value.split('\n').filter(l => l.trim()) : []
+                            });
+                        }
+                    });
+                }
 
                 try {
-                    const parsed = await parseResumeWithLLM(state.resumeText);
-                    if (parsed) {
-                        // Ensure personalInfo exists
-                        if (!parsed.personalInfo) {
-                            parsed.personalInfo = {
-                                fullName: parsed.fullName || '',
-                                email: parsed.email || '',
-                                phone: parsed.phone || '',
-                                location: parsed.location || '',
-                                linkedin: parsed.linkedin || '',
-                                github: parsed.github || '',
-                            };
-                        }
-                        // Ensure experience is array
-                        if (!parsed.experience) parsed.experience = [];
-                        if (!parsed.projects) parsed.projects = [];
-                        if (!parsed.skills) parsed.skills = '';
-                        if (!parsed.summary) parsed.summary = '';
-                        if (!parsed.education) parsed.education = '';
-                        if (!parsed.certifications) parsed.certifications = '';
+                    localStorage.setItem('curvina_resume_data', JSON.stringify(data));
+                    log('✅ Resume data saved to localStorage!', 'success');
+                    saveResumeBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                    setTimeout(() => {
+                        saveResumeBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+                    }, 1500);
+                } catch (e) {
+                    log('❌ Error saving resume data: ' + e.message, 'error');
+                }
+            }
 
-                        // Convert experience bullets to arrays if they are strings
-                        parsed.experience = parsed.experience.map(exp => {
-                            if (typeof exp.bullets === 'string') {
-                                exp.bullets = exp.bullets.split('\n').filter(b => b.trim());
-                            }
-                            if (!exp.bullets) exp.bullets = [];
-                            return exp;
-                        });
-                        // Ensure projects is array
-                        if (typeof parsed.projects === 'string') {
-                            parsed.projects = parsed.projects.split('\n').filter(p => p.trim());
-                        }
+            // ─── CLEAR RESUME FORM ──────────────────────────────────────────
+            function clearResumeForm() {
+                const fields = state._resumePreviewFields;
+                if (!fields) {
+                    log('⚠️ No resume fields to clear.', 'warn');
+                    return;
+                }
 
-                        // Update state
-                        state.resumeStructured = parsed;
-                        // Re-render the preview with the parsed data
-                        renderResumePreview(parsed);
+                if (!confirm('Clear all resume form fields?')) return;
 
-                        // Also update the fields in the _resumePreviewFields
-                        const fields = state._resumePreviewFields;
-                        if (fields) {
-                            if (fields.fullName) fields.fullName.value = parsed.personalInfo.fullName || '';
-                            if (fields.email) fields.email.value = parsed.personalInfo.email || '';
-                            if (fields.phone) fields.phone.value = parsed.personalInfo.phone || '';
-                            if (fields.location) fields.location.value = parsed.personalInfo.location || '';
-                            if (fields.linkedin) fields.linkedin.value = parsed.personalInfo.linkedin || '';
-                            if (fields.github) fields.github.value = parsed.personalInfo.github || '';
-                            if (fields.summary) fields.summary.value = parsed.summary || '';
-                            if (fields.skills) fields.skills.value = parsed.skills || '';
-                            if (fields.education) fields.education.value = parsed.education || '';
-                            if (fields.certifications) fields.certifications.value = parsed.certifications || '';
-                            if (fields.projects) fields.projects.value = (parsed.projects || []).join('\n') || '';
+                if (fields.fullName) fields.fullName.value = '';
+                if (fields.email) fields.email.value = '';
+                if (fields.phone) fields.phone.value = '';
+                if (fields.location) fields.location.value = '';
+                if (fields.linkedin) fields.linkedin.value = '';
+                if (fields.github) fields.github.value = '';
+                if (fields.summary) fields.summary.value = '';
+                if (fields.skills) fields.skills.value = '';
+                if (fields.education) fields.education.value = '';
+                if (fields.certifications) fields.certifications.value = '';
+                if (fields.projects) fields.projects.value = '';
 
-                            // Update experience fields
-                            const expContainer = document.getElementById('resume-experience-container');
-                            if (expContainer) {
-                                const items = expContainer.querySelectorAll('.field-group');
-                                const experiences = parsed.experience || [];
-                                items.forEach((item, idx) => {
-                                    const exp = experiences[idx] || {};
-                                    const title = item.querySelector(`#resume-exp-title-${idx}`);
-                                    const company = item.querySelector(`#resume-exp-company-${idx}`);
-                                    const location = item.querySelector(`#resume-exp-location-${idx}`);
-                                    const dates = item.querySelector(`#resume-exp-dates-${idx}`);
-                                    const bullets = item.querySelector(`#resume-exp-bullets-${idx}`);
-                                    if (title) title.value = exp.title || '';
-                                    if (company) company.value = exp.company || '';
-                                    if (location) location.value = exp.location || '';
-                                    if (dates) dates.value = exp.dates || '';
-                                    if (bullets) bullets.value = (exp.bullets || []).join('\n') || '';
-                                });
-                            }
-                        }
+                const expContainer = document.getElementById('resume-experience-container');
+                if (expContainer) {
+                    const items = expContainer.querySelectorAll('.field-group');
+                    items.forEach((item) => {
+                        const inputs = item.querySelectorAll('input, textarea');
+                        inputs.forEach(input => input.value = '');
+                    });
+                }
 
-                        log('✅ Personal info fetched and filled successfully!', 'success');
-                        fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-check"></i> Fetched!';
-                        setTimeout(() => {
-                            fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
-                            fetchPersonalInfoBtn.disabled = false;
-                        }, 2000);
-                    } else {
-                        log('❌ Failed to parse resume with AI. Try the fallback parser.', 'error');
-                        // Try fallback parser
-                        const fallback = structureResumeFromText(state.resumeText);
-                        if (fallback) {
-                            state.resumeStructured = fallback;
-                            renderResumePreview(fallback);
-                            log('✅ Resume parsed using fallback parser.', 'success');
-                            fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-check"></i> Fetched (fallback)';
-                            setTimeout(() => {
-                                fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
-                                fetchPersonalInfoBtn.disabled = false;
-                            }, 2000);
-                        } else {
-                            fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
-                            fetchPersonalInfoBtn.disabled = false;
+                log('🧹 Resume form cleared.', 'info');
+                clearResumeBtn.innerHTML = '<i class="fas fa-check"></i> Cleared!';
+                setTimeout(() => {
+                    clearResumeBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Clear';
+                }, 1500);
+            }
+
+            // ─── LOAD SAVED RESUME ──────────────────────────────────────────
+            function loadSavedResume() {
+                try {
+                    const saved = localStorage.getItem('curvina_resume_data');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        if (data) {
+                            state.resumeStructured = data;
+                            renderResumePreview(data);
+                            fillFormFields(data);
+                            log('✅ Saved resume loaded from localStorage.', 'success');
                         }
                     }
                 } catch (e) {
-                    log('❌ Error fetching personal info: ' + e.message, 'error');
-                    fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
-                    fetchPersonalInfoBtn.disabled = false;
+                    // ignore
                 }
             }
 
@@ -1739,42 +1910,22 @@
                 return structured;
             }
 
-            // ─── LOAD RESUME (UPDATED) ──────────────────────────────────
+            // ─── LOAD RESUME ──────────────────────────────────────────────
             async function loadResume(text, filename) {
                 state.resumeText = text;
                 state.hasResume = true;
                 resumeFileName.innerHTML = `<i class="fas fa-check-circle" style="color:#55efc4;"></i> ${escapeText(filename || 'Resume')} (${text.length} chars)`;
                 log(`✅ Resume loaded: ${text.length} chars`, 'success');
 
-                // Try LLM parsing first
-                let structured = null;
-                try {
-                    structured = await parseResumeWithLLM(text);
-                    if (structured) {
-                        log('✅ Resume parsed using LLM.', 'success');
-                        if (!structured.personalInfo) {
-                            structured.personalInfo = {
-                                fullName: structured.fullName || '',
-                                email: structured.email || '',
-                                phone: structured.phone || '',
-                                location: structured.location || '',
-                                linkedin: structured.linkedin || '',
-                                github: structured.github || '',
-                            };
-                        }
-                        state.resumeStructured = structured;
-                        renderResumePreview(structured);
-                    } else {
-                        log('⚠️ LLM parsing failed, falling back to rule-based parser.', 'warn');
-                        structured = structureResumeFromText(text);
-                        state.resumeStructured = structured;
-                        renderResumePreview(structured);
-                    }
-                } catch (e) {
-                    log('❌ LLM parsing error: ' + e.message, 'error');
-                    structured = structureResumeFromText(text);
-                    state.resumeStructured = structured;
-                    renderResumePreview(structured);
+                // Use simple parser immediately to fill the form
+                const parsed = parseResumeSimple(text);
+                if (parsed) {
+                    state.resumeStructured = parsed;
+                    renderResumePreview(parsed);
+                    fillFormFields(parsed);
+                    log('✅ Resume parsed and fields filled.', 'success');
+                } else {
+                    log('⚠️ Could not parse resume. Try fetching manually.', 'warn');
                 }
 
                 if (!state.engine) {
@@ -2236,7 +2387,7 @@
                 sectionsContainer.innerHTML = html;
             }
 
-            // ─── CLEAR ──────────────────────────────────────────────
+            // ─── CLEAR ALL ──────────────────────────────────────────────
             function clearAll() {
                 state.jobDescription = null;
                 state.jobKeywords = [];
@@ -2380,8 +2531,9 @@
                 }
             });
 
-            // ─── FETCH PERSONAL INFO BUTTON ────────────────────────────
             fetchPersonalInfoBtn.addEventListener('click', fetchPersonalInfo);
+            saveResumeBtn.addEventListener('click', saveResumeData);
+            clearResumeBtn.addEventListener('click', clearResumeForm);
 
             copyAllBtn.addEventListener('click', function() {
                 const text = assembleFullResumeText();
@@ -2449,6 +2601,7 @@
                     log('⚠️ RAGina init failed.', 'error');
                 }
                 updateGenerateButton();
+                loadSavedResume();
                 log('🧜‍♀️ CurVina Content Generator ready.', 'info');
             }
 
@@ -2457,6 +2610,16 @@
             } else {
                 init();
             }
+
+            // ─── EXPOSE ──────────────────────────────────────────────
+            window.__curvina = {
+                state: state,
+                generateContent: generateContent,
+                curifySection: curifySection,
+                clearAll: clearAll,
+                log: log
+            };
+
         })();
     </script>
 
