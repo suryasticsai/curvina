@@ -13,11 +13,28 @@
     <script src="https://cdn.jsdelivr.net/gh/suryasticsai/RAGina@main/ragina.js">
     </script>
 
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
+    </script>
+    <!-- Mammoth.js for DOCX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js">
+    </script>
+    <!-- Tesseract.js for OCR (images) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js">
+    </script>
+    <!-- Compromise for NLP -->
+    <script src="https://unpkg.com/compromise@14.7.0/builds/compromise.min.js">
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: #e8e0d8;
@@ -26,25 +43,43 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            background-image: radial-gradient(circle at 20% 80%, rgba(200,180,160,0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 20%, rgba(180,160,140,0.10) 0%, transparent 50%);
+            background-image: radial-gradient(circle at 20% 80%, rgba(200, 180, 160, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(180, 160, 140, 0.10) 0%, transparent 50%);
         }
-        .container { max-width: 1200px; width: 100%; }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
         .letterhead {
             background: #fcf9f5;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.06), 0 24px 64px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.06), 0 24px 64px rgba(0, 0, 0, 0.08);
             padding: 40px 48px 32px;
             position: relative;
         }
-        .letterhead::before { content: ''; position: absolute; inset: 14px; border: 1px solid rgba(201,168,76,0.12); pointer-events: none; }
-        .letterhead::after { content: ''; position: absolute; top: 0; left: 48px; right: 48px; height: 4px; background: linear-gradient(90deg, transparent, #c9a84c, #b8943a, #c9a84c, transparent); opacity: 0.5; }
+        .letterhead::before {
+            content: '';
+            position: absolute;
+            inset: 14px;
+            border: 1px solid rgba(201, 168, 76, 0.12);
+            pointer-events: none;
+        }
+        .letterhead::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 48px;
+            right: 48px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #c9a84c, #b8943a, #c9a84c, transparent);
+            opacity: 0.5;
+        }
 
         .header {
             display: flex;
             align-items: center;
             gap: 20px;
             padding-bottom: 16px;
-            border-bottom: 2px solid rgba(201,168,76,0.15);
+            border-bottom: 2px solid rgba(201, 168, 76, 0.15);
             margin-bottom: 24px;
         }
         .crest {
@@ -55,7 +90,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 0 2px rgba(201,168,76,0.15), 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
             flex-shrink: 0;
             overflow: hidden;
         }
@@ -71,7 +106,9 @@
             color: #1a2a3a;
             line-height: 1.1;
         }
-        .title-block h1 span { color: #c9a84c; }
+        .title-block h1 span {
+            color: #c9a84c;
+        }
         .title-block .sub {
             font-size: 0.85rem;
             color: #6a7a8a;
@@ -79,9 +116,10 @@
             align-items: center;
             gap: 8px;
         }
-        .title-block .sub i { color: #c9a84c; }
+        .title-block .sub i {
+            color: #c9a84c;
+        }
 
-        /* Collapsible JD card */
         .jd-collapsible {
             margin-top: 16px;
         }
@@ -113,7 +151,6 @@
             display: block;
         }
 
-        /* Console toggle */
         .console-toggle {
             display: flex;
             align-items: center;
@@ -137,9 +174,9 @@
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 16px;
-            background: rgba(255,255,255,0.4);
+            background: rgba(255, 255, 255, 0.4);
             padding: 14px 18px;
-            border: 1px solid rgba(201,168,76,0.1);
+            border: 1px solid rgba(201, 168, 76, 0.1);
         }
         .input-row input {
             flex: 1;
@@ -153,7 +190,7 @@
         .input-row input:focus {
             border-color: #c9a84c;
             outline: none;
-            box-shadow: 0 0 0 2px rgba(201,168,76,0.15);
+            box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.15);
         }
         .input-row textarea {
             width: 100%;
@@ -167,25 +204,29 @@
         }
 
         .file-drop {
-            border: 2px dashed rgba(201,168,76,0.2);
+            border: 2px dashed rgba(201, 168, 76, 0.2);
             padding: 20px;
             text-align: center;
             cursor: pointer;
             transition: background 0.2s, border-color 0.2s;
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
             width: 100%;
         }
         .file-drop:hover {
-            background: rgba(255,255,255,0.5);
-            border-color: rgba(201,168,76,0.4);
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(201, 168, 76, 0.4);
         }
-        .file-drop input { display: none; }
+        .file-drop input {
+            display: none;
+        }
         .file-drop .file-name {
             margin-top: 4px;
             font-size: 0.85rem;
             color: #5a6a7a;
         }
-        .file-drop .file-name i { color: #c9a84c; }
+        .file-drop .file-name i {
+            color: #c9a84c;
+        }
 
         .btn {
             padding: 10px 24px;
@@ -200,28 +241,77 @@
             align-items: center;
             gap: 6px;
         }
-        .btn:hover { background: #b8943a; }
-        .btn-secondary { background: #e0d6c8; color: #1a2a3a; }
-        .btn-secondary:hover { background: #d0c4b4; }
-        .btn-success { background: #00b894; color: #fff; }
-        .btn-success:hover { background: #00a381; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn:hover {
+            background: #b8943a;
+        }
+        .btn-secondary {
+            background: #e0d6c8;
+            color: #1a2a3a;
+        }
+        .btn-secondary:hover {
+            background: #d0c4b4;
+        }
+        .btn-success {
+            background: #00b894;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #00a381;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .btn-curify {
             background: linear-gradient(145deg, #6C63FF, #5a52e0);
             color: #fff;
         }
-        .btn-curify:hover { background: linear-gradient(145deg, #5a52e0, #4a42c0); transform: scale(1.02); }
-        .btn-curify:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-curify:hover {
+            background: linear-gradient(145deg, #5a52e0, #4a42c0);
+            transform: scale(1.02);
+        }
+        .btn-curify:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
         .btn-fetch-info {
             background: linear-gradient(145deg, #00b894, #00a381);
             color: #fff;
         }
-        .btn-fetch-info:hover { background: linear-gradient(145deg, #00a381, #00856a); transform: scale(1.02); }
-        .btn-fetch-info:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-danger { background: #ff6b6b; color: #fff; }
-        .btn-danger:hover { background: #e55a5a; transform: scale(1.02); }
-        .btn-save { background: #fdcb6e; color: #0a1f2b; }
-        .btn-save:hover { background: #fdcb6e; transform: scale(1.02); }
+        .btn-fetch-info:hover {
+            background: linear-gradient(145deg, #00a381, #00856a);
+            transform: scale(1.02);
+        }
+        .btn-fetch-info:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-danger {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #e55a5a;
+            transform: scale(1.02);
+        }
+        .btn-save {
+            background: #fdcb6e;
+            color: #0a1f2b;
+        }
+        .btn-save:hover {
+            background: #fdcb6e;
+            transform: scale(1.02);
+        }
+        .btn-download-json {
+            background: #6c5ce7;
+            color: #fff;
+        }
+        .btn-download-json:hover {
+            background: #5a4bd1;
+            transform: scale(1.02);
+        }
 
         .action-bar {
             display: flex;
@@ -247,21 +337,47 @@
             color: #555;
             border-radius: 20px;
         }
-        .status-badge.success { background: #55efc4; color: #0a2f44; }
-        .status-badge.error { background: #ff6b6b; color: #fff; }
-        .status-badge.loading { background: #fdcb6e; color: #0a2f44; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
-        .status-text { font-size: 0.9rem; color: #6a7a8a; }
-        .retry-text { font-size: 0.85rem; color: #6a7a8a; }
+        .status-badge.success {
+            background: #55efc4;
+            color: #0a2f44;
+        }
+        .status-badge.error {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        .status-badge.loading {
+            background: #fdcb6e;
+            color: #0a2f44;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .status-text {
+            font-size: 0.9rem;
+            color: #6a7a8a;
+        }
+        .retry-text {
+            font-size: 0.85rem;
+            color: #6a7a8a;
+        }
 
         .jd-card {
-            background: rgba(255,252,248,0.5);
-            border: 1px solid rgba(201,168,76,0.08);
+            background: rgba(255, 252, 248, 0.5);
+            border: 1px solid rgba(201, 168, 76, 0.08);
             padding: 20px 24px;
             margin-top: 16px;
             transition: border-color 0.2s;
         }
-        .jd-card:hover { border-color: rgba(201,168,76,0.2); }
+        .jd-card:hover {
+            border-color: rgba(201, 168, 76, 0.2);
+        }
         .jd-card .card-label {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -272,33 +388,36 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
             padding-bottom: 4px;
         }
-        .jd-card .card-label i { color: #c9a84c; }
+        .jd-card .card-label i {
+            color: #c9a84c;
+        }
         .jd-meta {
             font-size: 0.85rem;
             color: #5a6a7a;
-            background: rgba(201,168,76,0.06);
+            background: rgba(201, 168, 76, 0.06);
             padding: 4px 12px;
             display: inline-block;
             margin-bottom: 12px;
             border-left: 3px solid #c9a84c;
         }
-        .jd-meta strong { color: #1a2a3a; }
+        .jd-meta strong {
+            color: #1a2a3a;
+        }
 
         .keyword-chip {
             display: inline-block;
-            background: rgba(201,168,76,0.12);
+            background: rgba(201, 168, 76, 0.12);
             color: #5a4a3a;
             padding: 2px 10px;
             margin: 2px 4px 2px 0;
             font-size: 0.75rem;
-            border: 1px solid rgba(201,168,76,0.15);
+            border: 1px solid rgba(201, 168, 76, 0.15);
             border-radius: 20px;
         }
 
-        /* ─── Resume Preview Cards (Editable) ─── */
         .resume-preview-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -306,13 +425,17 @@
             margin-top: 16px;
         }
         .resume-preview-card {
-            background: rgba(255,252,248,0.5);
-            border: 1px solid rgba(201,168,76,0.08);
+            background: rgba(255, 252, 248, 0.5);
+            border: 1px solid rgba(201, 168, 76, 0.08);
             padding: 16px 20px;
             transition: border-color 0.2s;
         }
-        .resume-preview-card:hover { border-color: rgba(201,168,76,0.2); }
-        .resume-preview-card.full-width { grid-column: 1 / -1; }
+        .resume-preview-card:hover {
+            border-color: rgba(201, 168, 76, 0.2);
+        }
+        .resume-preview-card.full-width {
+            grid-column: 1 / -1;
+        }
         .resume-preview-card .card-label {
             font-size: 0.65rem;
             text-transform: uppercase;
@@ -323,10 +446,13 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
             padding-bottom: 4px;
         }
-        .resume-preview-card .card-label i { color: #c9a84c; font-size: 0.7rem; }
+        .resume-preview-card .card-label i {
+            color: #c9a84c;
+            font-size: 0.7rem;
+        }
         .resume-preview-card .field-group {
             margin-bottom: 8px;
         }
@@ -344,7 +470,7 @@
             border: 1px solid #ddd;
             font-size: 0.85rem;
             font-family: 'Inter', sans-serif;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255, 255, 255, 0.6);
             transition: border-color 0.2s;
         }
         .resume-preview-card .field-group input:focus,
@@ -356,10 +482,6 @@
             resize: vertical;
             min-height: 40px;
         }
-        .resume-preview-card .field-group .empty-field {
-            color: #8a9aaa;
-            font-style: italic;
-        }
 
         .section-grid {
             display: grid;
@@ -368,14 +490,18 @@
             margin-top: 16px;
         }
         .section-card {
-            background: rgba(255,252,248,0.5);
-            border: 1px solid rgba(201,168,76,0.08);
+            background: rgba(255, 252, 248, 0.5);
+            border: 1px solid rgba(201, 168, 76, 0.08);
             padding: 16px 20px;
             transition: border-color 0.2s;
             position: relative;
         }
-        .section-card:hover { border-color: rgba(201,168,76,0.2); }
-        .section-card.full-width { grid-column: 1 / -1; }
+        .section-card:hover {
+            border-color: rgba(201, 168, 76, 0.2);
+        }
+        .section-card.full-width {
+            grid-column: 1 / -1;
+        }
         .section-card .section-label {
             font-size: 0.65rem;
             text-transform: uppercase;
@@ -387,10 +513,13 @@
             align-items: center;
             gap: 8px;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
             padding-bottom: 4px;
         }
-        .section-card .section-label i { color: #c9a84c; font-size: 0.7rem; }
+        .section-card .section-label i {
+            color: #c9a84c;
+            font-size: 0.7rem;
+        }
         .section-card .section-content {
             font-size: 0.9rem;
             color: #1a2a3a;
@@ -407,14 +536,24 @@
         }
         .section-card .section-content .loading-dots::after {
             content: '...';
-            animation: dots 1.5s steps(4,end) infinite;
+            animation: dots 1.5s steps(4, end) infinite;
         }
         @keyframes dots {
-            0% { content: ''; }
-            25% { content: '.'; }
-            50% { content: '..'; }
-            75% { content: '...'; }
-            100% { content: ''; }
+            0% {
+                content: '';
+            }
+            25% {
+                content: '.';
+            }
+            50% {
+                content: '..';
+            }
+            75% {
+                content: '...';
+            }
+            100% {
+                content: '';
+            }
         }
         .section-card .section-content pre {
             margin: 0;
@@ -442,7 +581,9 @@
             background: #6C63FF;
             color: #fff;
         }
-        .section-actions .btn-curify:hover { background: #5a52e0; }
+        .section-actions .btn-curify:hover {
+            background: #5a52e0;
+        }
         .section-actions .btn-curify:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -460,7 +601,9 @@
             text-decoration: underline;
             padding: 2px 6px;
         }
-        .section-actions .prompt-toggle:hover { color: #c9a84c; }
+        .section-actions .prompt-toggle:hover {
+            color: #c9a84c;
+        }
         .section-actions .custom-prompt-input {
             width: 100%;
             margin-top: 6px;
@@ -468,7 +611,7 @@
             border: 1px solid #ccc;
             font-size: 0.8rem;
             font-family: 'Inter', sans-serif;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255, 255, 255, 0.6);
             transition: border-color 0.2s;
             display: none;
         }
@@ -480,14 +623,6 @@
             display: block;
         }
 
-        .empty-state {
-            color: #8a9aaa;
-            font-style: italic;
-            padding: 20px 0;
-            text-align: center;
-        }
-
-        /* ─── Log area ─── */
         .log-area {
             background: #1a1a1a;
             color: #d0d8e0;
@@ -506,25 +641,42 @@
         }
         .log-area .log-entry {
             padding: 2px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
-        .log-area .log-entry .time { color: #6a8f9e; margin-right: 10px; }
-        .log-area .log-entry .level { font-weight: 600; padding: 0 6px; border-radius: 2px; }
-        .log-area .log-entry .level.info { color: #74b9ff; }
-        .log-area .log-entry .level.success { color: #55efc4; }
-        .log-area .log-entry .level.error { color: #ff6b6b; }
-        .log-area .log-entry .level.warn { color: #fdcb6e; }
+        .log-area .log-entry .time {
+            color: #6a8f9e;
+            margin-right: 10px;
+        }
+        .log-area .log-entry .level {
+            font-weight: 600;
+            padding: 0 6px;
+            border-radius: 2px;
+        }
+        .log-area .log-entry .level.info {
+            color: #74b9ff;
+        }
+        .log-area .log-entry .level.success {
+            color: #55efc4;
+        }
+        .log-area .log-entry .level.error {
+            color: #ff6b6b;
+        }
+        .log-area .log-entry .level.warn {
+            color: #fdcb6e;
+        }
 
         .debug-toggle {
             cursor: pointer;
             background: #e8e0d8;
             padding: 4px 12px;
             font-size: 0.75rem;
-            border: 1px solid rgba(201,168,76,0.15);
+            border: 1px solid rgba(201, 168, 76, 0.15);
             margin-top: 8px;
             display: inline-block;
         }
-        .debug-toggle:hover { background: #d8d0c8; }
+        .debug-toggle:hover {
+            background: #d8d0c8;
+        }
         .debug-content {
             background: #f5f0ea;
             padding: 12px 16px;
@@ -534,7 +686,7 @@
             font-size: 0.8rem;
             white-space: pre-wrap;
             word-break: break-all;
-            border: 1px solid rgba(201,168,76,0.08);
+            border: 1px solid rgba(201, 168, 76, 0.08);
             margin-top: 6px;
             display: none;
         }
@@ -596,11 +748,10 @@
             font-size: 0.7rem;
         }
 
-        /* ─── Footer ─── */
         .app-footer {
             margin-top: 32px;
             padding-top: 16px;
-            border-top: 1px solid rgba(201,168,76,0.08);
+            border-top: 1px solid rgba(201, 168, 76, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -644,25 +795,66 @@
         }
 
         @media (max-width: 700px) {
-            .letterhead { padding: 20px 16px; }
-            .letterhead::after { left: 16px; right: 16px; }
-            .header { flex-wrap: wrap; gap: 12px; }
-            .input-row { flex-direction: column; }
-            .input-row input { width: 100%; }
-            .section-grid { grid-template-columns: 1fr; }
-            .resume-preview-grid { grid-template-columns: 1fr; }
-            .section-card { padding: 12px 14px; }
-            .resume-preview-card { padding: 12px 14px; }
-            .jd-card { padding: 14px 16px; }
-            .section-actions .btn { font-size: 0.65rem; padding: 3px 10px; }
-            .section-actions .custom-prompt-input { font-size: 0.75rem; }
-            .toggle-paste-row { flex-direction: column; }
-            .app-footer { flex-direction: column; align-items: center; text-align: center; }
+            .letterhead {
+                padding: 20px 16px;
+            }
+            .letterhead::after {
+                left: 16px;
+                right: 16px;
+            }
+            .header {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .input-row {
+                flex-direction: column;
+            }
+            .input-row input {
+                width: 100%;
+            }
+            .section-grid {
+                grid-template-columns: 1fr;
+            }
+            .resume-preview-grid {
+                grid-template-columns: 1fr;
+            }
+            .section-card {
+                padding: 12px 14px;
+            }
+            .resume-preview-card {
+                padding: 12px 14px;
+            }
+            .jd-card {
+                padding: 14px 16px;
+            }
+            .section-actions .btn {
+                font-size: 0.65rem;
+                padding: 3px 10px;
+            }
+            .section-actions .custom-prompt-input {
+                font-size: 0.75rem;
+            }
+            .toggle-paste-row {
+                flex-direction: column;
+            }
+            .app-footer {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
         }
 
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #c9a84c; border-radius: 0; }
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c9a84c;
+            border-radius: 0;
+        }
     </style>
 </head>
 <body>
@@ -683,7 +875,7 @@
 
             <!-- INPUTS -->
             <div class="input-row">
-                <input type="url" id="urlInput" placeholder="Paste a job posting URL (e.g. company careers page)" aria-label="Job posting URL" value="https://lseg.wd3.myworkdayjobs.com/en-US/Careers/job/IND-Hyderabad-CapitaLand/Senior-QA-Engineer-Python-with-Jmeter-_R0116074?q=Scrum%20&source=Linkedin" />
+                <input type="url" id="urlInput" placeholder="Paste a job posting URL (e.g. company careers page)" aria-label="Job posting URL" value="" />
                 <button class="btn" id="fetchBtn"><i class="fas fa-cloud-download-alt"></i> Fetch JD</button>
                 <div class="toggle-paste-row">
                     <button class="btn btn-secondary" id="pasteJdBtn"><i class="fas fa-paste"></i> Paste JD Text</button>
@@ -721,9 +913,9 @@
             <div class="input-row">
                 <div class="file-drop" id="resumeDrop">
                     <i class="fas fa-file-upload" style="font-size:1.5rem; color:#c9a84c;"></i>
-                    <div>Click to upload your resume (TXT)</div>
+                    <div>Click to upload your resume (PDF, DOCX, JPG, PNG, TXT)</div>
                     <div class="file-name" id="resumeFileName">No file selected</div>
-                    <input type="file" id="resumeFileInput" accept=".txt" />
+                    <input type="file" id="resumeFileInput" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png" />
                 </div>
             </div>
 
@@ -745,6 +937,9 @@
                         </button>
                         <button class="btn btn-secondary" id="toggleResumePreviewBtn" style="padding:4px 12px; font-size:0.7rem;">
                             <i class="fas fa-eye"></i> Hide
+                        </button>
+                        <button class="btn btn-download-json" id="downloadJsonBtn" title="Download the current resume data as JSON">
+                            <i class="fas fa-file-code"></i> Download JSON
                         </button>
                     </div>
                 </div>
@@ -827,7 +1022,7 @@
         (function() {
             'use strict';
 
-            // ─── askLLM with robust fallback to mock generator ──────────
+            // ─── askLLM with robust fallback ────────────────────────
             window.askLLM = async function(prompt, model, fallbackKeywords) {
                 const maxRetries = 2;
                 for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -1024,6 +1219,7 @@
             const fetchPersonalInfoBtn = document.getElementById('fetchPersonalInfoBtn');
             const saveResumeBtn = document.getElementById('saveResumeBtn');
             const clearResumeBtn = document.getElementById('clearResumeBtn');
+            const downloadJsonBtn = document.getElementById('downloadJsonBtn');
             const consoleToggle = document.getElementById('consoleToggle');
             const jdToggleLabel = document.getElementById('jdToggleLabel');
             const jdContent = document.getElementById('jdContent');
@@ -1061,16 +1257,16 @@
                 hasResume: false,
             };
 
-            // ─── PROXIES (expanded) ──────────────────────────────────────
+            // ─── PROXIES (Updated with more reliable ones) ──────────────
             const PROXIES = [
                 { name: 'AllOrigins', url: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
-                { name: 'CORS-Anywhere', url: (u) => `https://cors-anywhere.herokuapp.com/${u}` },
                 { name: 'CORSProxy.io', url: (u) => `https://corsproxy.io/?url=${encodeURIComponent(u)}` },
                 { name: 'CodeTabs', url: (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}` },
-                { name: 'ThingProxy', url: (u) => `https://thingproxy.freeboard.io/fetch/${u}` }
+                { name: 'ThingProxy', url: (u) => `https://thingproxy.freeboard.io/fetch/${u}` },
+                { name: 'CORS-Anywhere', url: (u) => `https://cors-anywhere.herokuapp.com/${u}` }
             ];
             let currentProxyIndex = 0;
-            const MAX_RETRIES = 8;
+            const MAX_RETRIES = 12;
 
             // ─── LOGGER ──────────────────────────────────────────────
             function log(message, level) {
@@ -1093,7 +1289,7 @@
                 }
                 statusText.textContent = message;
 
-                if (level === 'error' && message.includes('fetch') || message.includes('HTTP')) {
+                if (level === 'error' && (message.includes('fetch') || message.includes('HTTP'))) {
                     fetchFailSuggestion.style.display = 'block';
                 }
             }
@@ -1160,7 +1356,9 @@
                     '.description',
                     '.posting-description',
                     '.job-details',
-                    'article'
+                    'article',
+                    '.content',
+                    '[role="main"]'
                 ];
                 for (let sel of selectors) {
                     const el = doc.querySelector(sel);
@@ -1174,7 +1372,8 @@
                     const text = body.textContent;
                     const match = text.match(/Role Profile[\s\S]{200,}/i) ||
                         text.match(/Job Description[\s\S]{200,}/i) ||
-                        text.match(/About the Job[\s\S]{200,}/i);
+                        text.match(/About the Job[\s\S]{200,}/i) ||
+                        text.match(/Requirements[\s\S]{200,}/i);
                     if (match) {
                         return parseDescription(match[0]);
                     }
@@ -1209,10 +1408,13 @@
                 };
                 const titleMatch = text.match(/^([A-Za-z\s\-\(\)]+)/);
                 if (titleMatch) result.title = titleMatch[1].trim();
-                if (text.includes('Full time')) result.employmentType = 'FULL_TIME';
-                else if (text.includes('Part time')) result.employmentType = 'PART_TIME';
+                if (text.includes('Full time') || text.includes('Full-time')) result.employmentType = 'FULL_TIME';
+                else if (text.includes('Part time') || text.includes('Part-time')) result.employmentType = 'PART_TIME';
                 const locMatch = text.match(/(IND-[A-Za-z\-]+)/);
                 if (locMatch) result.jobLocation = locMatch[1];
+                // Try to extract company name
+                const companyMatch = text.match(/(?:at|with|for)\s+([A-Z][A-Za-z\s&]+?)(?:\s|,|\.)/);
+                if (companyMatch) result.hiringOrganization = companyMatch[1].trim();
                 return result;
             }
 
@@ -1239,10 +1441,10 @@
                         found.push(match);
                     }
                 }
-                return [...new Set(found)].slice(0, 15);
+                return [...new Set(found)].slice(0, 20);
             }
 
-            // ─── FETCH WITH RETRY (expanded) ──────────────────────────
+            // ─── FETCH WITH RETRY (Improved) ──────────────────────────
             async function fetchWithRetry(url, maxRetries) {
                 maxRetries = maxRetries || MAX_RETRIES;
                 let retryCount = 0;
@@ -1260,14 +1462,16 @@
 
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 30000);
+                        const timeoutId = setTimeout(() => controller.abort(), 35000);
 
                         const response = await fetch(proxyUrl, {
                             signal: controller.signal,
                             headers: {
                                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                                 'Accept-Language': 'en-US,en;q=0.9',
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                                'Cache-Control': 'no-cache',
+                                'Pragma': 'no-cache'
                             }
                         });
                         clearTimeout(timeoutId);
@@ -1280,16 +1484,17 @@
                         retryText.textContent = `✅ Success (${proxy.name})`;
                         log(`✅ Fetched ${rawHtml.length} chars via ${proxy.name}.`, 'success');
 
-                        if (rawHtml.length < 100 || rawHtml.includes('Access Denied') || rawHtml.includes('Blocked')) {
+                        if (rawHtml.length < 100 || rawHtml.includes('Access Denied') || rawHtml.includes('Blocked') ||
+                            rawHtml.includes('Security') || rawHtml.includes('Forbidden')) {
                             throw new Error('Proxy returned error page or empty response.');
                         }
 
                         const jd = extractJD(rawHtml);
-                        if (jd) {
+                        if (jd && jd.description && jd.description.length > 50) {
                             state.jobDescription = jd;
                             state.jobKeywords = extractKeywords(jd.description);
                             renderJD(jd);
-                            log('✅ JD extracted.', 'success');
+                            log('✅ JD extracted successfully.', 'success');
                             log('📌 Keywords: ' + state.jobKeywords.join(', '), 'info');
                             setStatus('Success', 'success');
                             statusText.textContent = `JD loaded (${rawHtml.length} chars)`;
@@ -1312,7 +1517,7 @@
                         currentProxyIndex++;
 
                         if (retryCount < maxRetries) {
-                            const waitTime = Math.min(retryCount * 1500, 5000);
+                            const waitTime = Math.min(retryCount * 2000, 6000);
                             log(`⏳ Waiting ${waitTime}ms before retry...`, 'warn');
                             await new Promise(r => setTimeout(r, waitTime));
                         }
@@ -1322,7 +1527,7 @@
                 retryText.textContent = `❌ Failed after ${maxRetries} attempts`;
                 log(`❌ All ${maxRetries} attempts failed. Last error: ${lastError?.message}`, 'error');
                 setStatus('Error', 'error');
-                statusText.textContent = `Failed: ${lastError?.message || 'Unknown error'}`;
+                statusText.textContent = `Failed: ${lastError?.message || 'Unknown error'}. Try pasting the JD manually.`;
                 fetchFailSuggestion.style.display = 'block';
                 return false;
             }
@@ -1331,7 +1536,7 @@
             function renderJD(jd) {
                 if (!jd || !jd.description) {
                     jdContainer.innerHTML =
-                    `<div style="color:#8a9aaa; font-style:italic; padding:20px 0; text-align:center;">No job description.</div>`;
+                        `<div style="color:#8a9aaa; font-style:italic; padding:20px 0; text-align:center;">No job description.</div>`;
                     return;
                 }
 
@@ -1369,7 +1574,245 @@
                 jdContainer.innerHTML = html;
             }
 
-            // ─── SIMPLE RESUME PARSER (NO LLM) ──────────────────────────
+            // ─── AI‑BASED RESUME PARSER ───────────────────────────────
+            async function parseResumeWithAI(text) {
+                const prompt = `
+                    You are an expert resume parser. Extract the following fields from the resume text below.
+                    Return ONLY a valid JSON object with exactly these keys:
+                    {
+                        "fullName": "",
+                        "email": "",
+                        "phone": "",
+                        "location": "",
+                        "linkedin": "",
+                        "github": "",
+                        "summary": "",
+                        "skills": "",
+                        "experience": [
+                            { "title": "", "company": "", "location": "", "dates": "", "bullets": [] }
+                        ],
+                        "education": "",
+                        "certifications": "",
+                        "projects": []
+                    }
+
+                    Rules:
+                    - If a field is not found, use an empty string or empty array.
+                    - For experience, extract each job as a separate object. Bullets should be a list of achievement strings.
+                    - For skills, combine all technical and soft skills into a single comma-separated string.
+                    - For projects, list each project as a string (title and brief description).
+                    - Output ONLY the JSON, no extra text or explanation.
+
+                    Resume text:
+                    ${text}
+                `;
+
+                try {
+                    const result = await window.askLLM(prompt, 'openai', []);
+                    let cleaned = result.trim();
+                    cleaned = cleaned.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+                    const parsed = JSON.parse(cleaned);
+                    return {
+                        personalInfo: {
+                            fullName: parsed.fullName || '',
+                            email: parsed.email || '',
+                            phone: parsed.phone || '',
+                            location: parsed.location || '',
+                            linkedin: parsed.linkedin || '',
+                            github: parsed.github || '',
+                        },
+                        summary: parsed.summary || '',
+                        skills: parsed.skills || '',
+                        experience: parsed.experience || [],
+                        education: parsed.education || '',
+                        certifications: parsed.certifications || '',
+                        projects: parsed.projects || []
+                    };
+                } catch (e) {
+                    log('⚠️ AI parser error: ' + e.message, 'warn');
+                    return null;
+                }
+            }
+
+            // ─── ENHANCED RESUME PARSER ────────────────────────────────
+            function enhancedResumeParser(text) {
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                const doc = nlp(text);
+
+                const email = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)?.[0] || '';
+                const phone = text.match(/\+?[\d\s\-()]{8,}/)?.[0] || '';
+                const linkedin = text.match(/linkedin\.com\/in\/[a-zA-Z0-9\-]+/i)?.[0] || '';
+                const github = text.match(/github\.com\/[a-zA-Z0-9\-]+/i)?.[0] || '';
+
+                let name = '';
+                const nameRegex = /^([A-Za-z]+\s+[A-Za-z]+(?:\s+[A-Za-z]+)?)/;
+                for (let line of lines) {
+                    if (line.match(nameRegex) && line.length < 60) {
+                        name = line.match(nameRegex)[0];
+                        break;
+                    }
+                }
+                if (!name) {
+                    for (let line of lines) {
+                        if (/^[A-Z][a-z]+\s+[A-Z][a-z]+/.test(line) && line.length < 40) {
+                            name = line;
+                            break;
+                        }
+                    }
+                }
+
+                const locations = ['Hyderabad', 'Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Pune', 'India', 'San Francisco',
+                    'New York', 'Austin', 'London', 'Singapore', 'Seattle', 'Chicago', 'Boston', 'Toronto', 'Sydney'
+                ];
+                let location = '';
+                for (let loc of locations) {
+                    if (text.includes(loc)) { location = loc; break; }
+                }
+
+                const sectionMap = {
+                    summary: ['summary', 'profile', 'about me', 'objective'],
+                    experience: ['experience', 'work', 'employment', 'career history', 'professional experience'],
+                    education: ['education', 'academic', 'qualification', 'studies'],
+                    skills: ['skills', 'technical skills', 'competencies', 'expertise', 'core skills'],
+                    projects: ['projects', 'personal projects', 'side projects'],
+                    certifications: ['certifications', 'certificates', 'licenses']
+                };
+
+                let currentSection = 'other';
+                const sections = {
+                    summary: [],
+                    experience: [],
+                    education: [],
+                    skills: [],
+                    projects: [],
+                    certifications: []
+                };
+
+                const headingIndices = [];
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const lower = line.toLowerCase();
+                    const isAllCaps = /^[A-Z\s\-]{4,}$/.test(line);
+                    const endsWithColon = /:$/.test(line);
+                    const isShort = line.length < 60;
+                    if (isShort && (isAllCaps || endsWithColon)) {
+                        headingIndices.push(i);
+                        continue;
+                    }
+                    let matched = false;
+                    for (const [key, keywords] of Object.entries(sectionMap)) {
+                        if (keywords.some(kw => lower.includes(kw) && isShort)) {
+                            headingIndices.push(i);
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (matched) continue;
+                }
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (headingIndices.includes(i)) {
+                        const lower = line.toLowerCase();
+                        let found = false;
+                        for (const [key, keywords] of Object.entries(sectionMap)) {
+                            if (keywords.some(kw => lower.includes(kw))) {
+                                currentSection = key;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) currentSection = 'other';
+                        continue;
+                    }
+                    if (/^[-—]{2,}$/.test(line)) continue;
+                    if (sections[currentSection]) {
+                        sections[currentSection].push(line);
+                    }
+                }
+
+                function parseExperience(expLines) {
+                    const result = [];
+                    let current = null;
+                    for (let line of expLines) {
+                        const isDash = /—|–/.test(line);
+                        const isAt = /\s+at\s+/i.test(line);
+                        const hasDates = /\d{4}\s*[-–]\s*(present|\d{4})/i.test(line);
+                        const isCapWithDates = /^[A-Z][a-zA-Z\s]+/.test(line) && hasDates;
+
+                        if (isDash || isAt || isCapWithDates) {
+                            if (current) result.push(current);
+                            let title = '',
+                                company = '';
+                            if (isDash) {
+                                const parts = line.split(/—|–/);
+                                if (parts.length === 2) {
+                                    const left = parts[0].trim();
+                                    const right = parts[1].trim();
+                                    if (/[A-Z]{2,}/.test(left) && right.length > 0) {
+                                        company = left;
+                                        title = right;
+                                    } else {
+                                        title = left;
+                                        company = right;
+                                    }
+                                } else {
+                                    title = line;
+                                }
+                            } else if (isAt) {
+                                const parts = line.split(/\s+at\s+/i);
+                                title = parts[0].trim();
+                                company = parts[1] ? parts[1].trim() : '';
+                            } else {
+                                title = line;
+                            }
+                            let dates = '';
+                            const dateMatch = line.match(/\d{4}\s*[-–]\s*(present|\d{4})/i);
+                            if (dateMatch) dates = dateMatch[0];
+                            if (dates) {
+                                title = title.replace(/\d{4}\s*[-–]\s*(present|\d{4})/i, '').trim();
+                                company = company.replace(/\d{4}\s*[-–]\s*(present|\d{4})/i, '').trim();
+                            }
+                            current = { title, company, location: '', dates, bullets: [] };
+                        } else if (current) {
+                            if (/^[•\-–]\s*/.test(line)) {
+                                current.bullets.push(line.replace(/^[•\-–]\s*/, ''));
+                            } else if (/\d{4}\s*[-–]\s*(present|\d{4})/i.test(line) && !current.dates) {
+                                current.dates = line;
+                            } else if (line.match(/^[A-Z][a-z]+,\s*[A-Z]{2}/) && !current.location) {
+                                current.location = line;
+                            } else if (line.length > 5 && !/^[A-Z\s]{4,}$/.test(line)) {
+                                current.bullets.push(line);
+                            }
+                        }
+                    }
+                    if (current) result.push(current);
+                    return result;
+                }
+
+                const experience = parseExperience(sections.experience);
+
+                const structured = {
+                    personalInfo: { fullName: name, email, phone, location, linkedin, github },
+                    summary: sections.summary.join(' '),
+                    skills: sections.skills.join(', ').replace(/,\s*,/g, ',').replace(/^[, ]+/, '').replace(/[, ]+$/, ''),
+                    experience: experience,
+                    education: sections.education.join('\n'),
+                    certifications: sections.certifications.join('\n'),
+                    projects: sections.projects
+                };
+
+                if (!structured.skills) {
+                    const toolsMatch = text.match(/TOOLS & PLATFORMS([\s\S]*?)(?=\n\n|\n[A-Z]{4,})/i);
+                    if (toolsMatch) {
+                        structured.skills = toolsMatch[1].replace(/\n/g, ', ').replace(/,\s*,/g, ',').trim();
+                    }
+                }
+
+                return structured;
+            }
+
+            // ─── SIMPLE FALLBACK PARSER ──────────────────────────────
             function parseResumeSimple(text) {
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l);
                 const resume = {
@@ -1382,18 +1825,15 @@
                     projects: []
                 };
 
-                // Extract name (first non-empty line that looks like a name)
                 let nameFound = false;
                 for (let i = 0; i < Math.min(lines.length, 20); i++) {
                     const line = lines[i];
-                    // Look for two words with capitals (likely a name)
                     if (line.match(/^[A-Z][a-z]+\s+[A-Z][a-z]+/)) {
                         resume.personalInfo.fullName = line;
                         nameFound = true;
                         break;
                     }
                 }
-                // If not found, take the first line that is not all caps (not a section header)
                 if (!nameFound) {
                     for (let i = 0; i < Math.min(lines.length, 10); i++) {
                         const line = lines[i];
@@ -1404,23 +1844,17 @@
                     }
                 }
 
-                // Extract email
                 const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
                 if (emailMatch) resume.personalInfo.email = emailMatch[0];
-                // Extract phone
                 const phoneMatch = text.match(/\+?[\d\s\-()]{8,}/);
                 if (phoneMatch) resume.personalInfo.phone = phoneMatch[0];
-                // LinkedIn
                 const linkedinMatch = text.match(/linkedin\.com\/in\/[a-zA-Z0-9\-]+/i);
                 if (linkedinMatch) resume.personalInfo.linkedin = linkedinMatch[0];
-                // GitHub
                 const githubMatch = text.match(/github\.com\/[a-zA-Z0-9\-]+/i);
                 if (githubMatch) resume.personalInfo.github = githubMatch[0];
-                // Location
                 const locMatch = text.match(/(Hyderabad|Bangalore|Mumbai|Delhi|Chennai|Pune|India)/i);
                 if (locMatch) resume.personalInfo.location = locMatch[0];
 
-                // Find sections
                 let currentSection = 'summary';
                 let currentExp = null;
                 let expBullets = [];
@@ -1486,7 +1920,6 @@
                     resume.experience.push({ ...currentExp, bullets: expBullets });
                 }
 
-                // Clean skills
                 resume.skills = resume.skills.replace(/,\s*,/g, ',').replace(/^[, ]+/, '').replace(/[, ]+$/, '');
                 if (!resume.skills) {
                     const toolsMatch = text.match(/TOOLS & PLATFORMS([\s\S]*?)(?=\n##|\n$)/);
@@ -1501,6 +1934,166 @@
                 }
 
                 return resume;
+            }
+
+            // ─── EXTRACT TEXT FROM FILE ──────────────────────────────
+            async function extractFileText(file) {
+                const ext = file.name.split('.').pop().toLowerCase();
+                let rawText = '';
+
+                try {
+                    if (ext === 'pdf') {
+                        rawText = await extractPDFText(file);
+                    } else if (ext === 'docx') {
+                        rawText = await extractDOCXText(file);
+                    } else if (['jpg', 'jpeg', 'png'].includes(ext)) {
+                        rawText = await extractImageText(file);
+                    } else if (ext === 'txt') {
+                        rawText = await file.text();
+                    } else {
+                        throw new Error('Unsupported file format');
+                    }
+                } catch (e) {
+                    log('❌ Extraction error: ' + e.message, 'error');
+                    try {
+                        rawText = await file.text();
+                    } catch (_) { rawText = ''; }
+                }
+                return rawText;
+            }
+
+            function extractPDFText(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        try {
+                            const typedArray = new Uint8Array(e.target.result);
+                            const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+                            let fullText = '';
+                            for (let i = 1; i <= pdf.numPages; i++) {
+                                const page = await pdf.getPage(i);
+                                const content = await page.getTextContent();
+                                const strings = content.items.map(item => item.str);
+                                fullText += strings.join(' ') + '\n';
+                            }
+                            resolve(fullText);
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            function extractDOCXText(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        try {
+                            const arrayBuffer = e.target.result;
+                            const result = await mammoth.extractRawText({ arrayBuffer });
+                            resolve(result.value);
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            function extractImageText(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        try {
+                            const imageData = e.target.result;
+                            const { data: { text } } = await Tesseract.recognize(imageData, 'eng');
+                            resolve(text);
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // ─── LOAD RESUME ──────────────────────────────────────────
+            async function loadResume(file) {
+                resumeFileName.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Parsing ${escapeText(file.name)}...`;
+
+                let rawText = '';
+                try {
+                    rawText = await extractFileText(file);
+                } catch (e) {
+                    log('❌ File extraction failed: ' + e.message, 'error');
+                    resumeFileName.textContent = 'Error: ' + e.message;
+                    return;
+                }
+
+                if (!rawText || rawText.length < 50) {
+                    log('⚠️ Could not extract meaningful text from the file.', 'warn');
+                    resumeFileName.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Low text content. Try another file.`;
+                    return;
+                }
+
+                state.resumeText = rawText;
+                state.hasResume = true;
+                resumeFileName.innerHTML =
+                    `<i class="fas fa-check-circle" style="color:#55efc4;"></i> ${escapeText(file.name)} (${rawText.length} chars)`;
+                log(`✅ Extracted ${rawText.length} chars from ${file.name}`, 'success');
+
+                let parsed = null;
+                try {
+                    parsed = await parseResumeWithAI(rawText);
+                    if (parsed) {
+                        log('✅ AI parser succeeded.', 'success');
+                    }
+                } catch (e) {
+                    log('⚠️ AI parser failed: ' + e.message, 'warn');
+                }
+
+                if (!parsed) {
+                    try {
+                        parsed = enhancedResumeParser(rawText);
+                        if (parsed && parsed.personalInfo && parsed.personalInfo.fullName) {
+                            log('✅ Enhanced parser succeeded.', 'success');
+                        } else {
+                            parsed = null;
+                        }
+                    } catch (e) {
+                        log('⚠️ Enhanced parser error: ' + e.message, 'warn');
+                    }
+                }
+
+                if (!parsed) {
+                    log('ℹ️ Using fallback simple parser.', 'info');
+                    parsed = parseResumeSimple(rawText);
+                }
+
+                if (parsed) {
+                    state.resumeStructured = parsed;
+                    renderResumePreview(parsed);
+                    fillFormFields(parsed);
+                    log('✅ Resume parsed and fields filled.', 'success');
+                } else {
+                    log('❌ Failed to parse resume.', 'error');
+                    return;
+                }
+
+                if (!state.engine) {
+                    if (!initRAGina()) return;
+                }
+                const sections = { 'resume': { bodyText: rawText } };
+                try {
+                    state.engine.buildIndex(sections, 200);
+                    log('✅ RAGina index built.', 'success');
+                    updateGenerateButton();
+                } catch (e) {
+                    log('❌ Index error: ' + e.message, 'error');
+                }
             }
 
             // ─── FILL FORM FIELDS ──────────────────────────────────────
@@ -1524,16 +2117,12 @@
                 if (fields.certifications) fields.certifications.value = structured.certifications || '';
                 if (fields.projects) fields.projects.value = (structured.projects || []).join('\n') || '';
 
-                // Experience
                 const expContainer = document.getElementById('resume-experience-container');
                 if (expContainer) {
                     const items = expContainer.querySelectorAll('.field-group');
                     const experiences = structured.experience || [];
                     if (items.length === 0 && experiences.length > 0) {
-                        // We need to rebuild experience container
-                        // For simplicity, we'll rebuild the entire preview grid
                         renderResumePreview(structured);
-                        // Re-fetch fields
                         state._resumePreviewFields = {
                             fullName: document.getElementById('resume-fullname'),
                             email: document.getElementById('resume-email'),
@@ -1547,7 +2136,6 @@
                             certifications: document.getElementById('resume-certifications'),
                             projects: document.getElementById('resume-projects'),
                         };
-                        // Recursive call to fill again after rebuild
                         fillFormFields(structured);
                         return;
                     }
@@ -1567,55 +2155,7 @@
                 }
             }
 
-            // ─── FETCH PERSONAL INFO ──────────────────────────────────────
-            async function fetchPersonalInfo() {
-                if (!state.resumeText || state.resumeText.length < 50) {
-                    log('⚠️ No resume text available. Please upload a resume first.', 'warn');
-                    return;
-                }
-
-                fetchPersonalInfoBtn.disabled = true;
-                fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Parsing...';
-
-                try {
-                    // Use simple parser directly (no LLM) to be reliable
-                    const parsed = parseResumeSimple(state.resumeText);
-                    if (parsed) {
-                        state.resumeStructured = parsed;
-                        // Ensure we have a personalInfo object
-                        if (!parsed.personalInfo) {
-                            parsed.personalInfo = {
-                                fullName: parsed.fullName || '',
-                                email: parsed.email || '',
-                                phone: parsed.phone || '',
-                                location: parsed.location || '',
-                                linkedin: parsed.linkedin || '',
-                                github: parsed.github || '',
-                            };
-                        }
-                        // Render preview with parsed data
-                        renderResumePreview(parsed);
-                        // Fill the form fields
-                        fillFormFields(parsed);
-                        log('✅ Personal info fetched and filled successfully!', 'success');
-                        fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-check"></i> Fetched!';
-                        setTimeout(() => {
-                            fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
-                            fetchPersonalInfoBtn.disabled = false;
-                        }, 2000);
-                    } else {
-                        log('❌ Failed to parse resume.', 'error');
-                        fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
-                        fetchPersonalInfoBtn.disabled = false;
-                    }
-                } catch (e) {
-                    log('❌ Error fetching personal info: ' + e.message, 'error');
-                    fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
-                    fetchPersonalInfoBtn.disabled = false;
-                }
-            }
-
-            // ─── RENDER RESUME PREVIEW (Editable) ──────────────────────
+            // ─── RENDER RESUME PREVIEW ────────────────────────────────
             function renderResumePreview(structured) {
                 if (!structured) {
                     log('⚠️ Structured resume is null.', 'warn');
@@ -1752,7 +2292,7 @@
                 fetchPersonalInfoBtn.disabled = false;
             }
 
-            // ─── SAVE RESUME DATA ──────────────────────────────────────────
+            // ─── SAVE RESUME DATA ──────────────────────────────────────
             function saveResumeData() {
                 const fields = state._resumePreviewFields;
                 if (!fields) {
@@ -1810,7 +2350,7 @@
                 }
             }
 
-            // ─── CLEAR RESUME FORM ──────────────────────────────────────────
+            // ─── CLEAR RESUME FORM ──────────────────────────────────────
             function clearResumeForm() {
                 const fields = state._resumePreviewFields;
                 if (!fields) {
@@ -1848,7 +2388,7 @@
                 }, 1500);
             }
 
-            // ─── LOAD SAVED RESUME ──────────────────────────────────────────
+            // ─── LOAD SAVED RESUME ──────────────────────────────────────
             function loadSavedResume() {
                 try {
                     const saved = localStorage.getItem('curvina_resume_data');
@@ -1866,7 +2406,7 @@
                 }
             }
 
-            // ─── GET EDITED RESUME DATA ──────────────────────────────────
+            // ─── GET EDITED RESUME DATA ──────────────────────────────
             function getEditedResumeData() {
                 const fields = state._resumePreviewFields || {};
                 const structured = {
@@ -1910,46 +2450,111 @@
                 return structured;
             }
 
-            // ─── LOAD RESUME ──────────────────────────────────────────────
-            async function loadResume(text, filename) {
-                state.resumeText = text;
-                state.hasResume = true;
-                resumeFileName.innerHTML = `<i class="fas fa-check-circle" style="color:#55efc4;"></i> ${escapeText(filename || 'Resume')} (${text.length} chars)`;
-                log(`✅ Resume loaded: ${text.length} chars`, 'success');
+            // ─── FETCH PERSONAL INFO ──────────────────────────────────────
+            async function fetchPersonalInfo() {
+                if (!state.resumeText || state.resumeText.length < 50) {
+                    log('⚠️ No resume text available. Please upload a resume first.', 'warn');
+                    return;
+                }
 
-                // Use simple parser immediately to fill the form
-                const parsed = parseResumeSimple(text);
+                fetchPersonalInfoBtn.disabled = true;
+                fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Parsing with AI...';
+
+                let parsed = null;
+
+                try {
+                    parsed = await parseResumeWithAI(state.resumeText);
+                    if (parsed) {
+                        log('✅ AI parser succeeded.', 'success');
+                    }
+                } catch (e) {
+                    log('⚠️ AI parser failed: ' + e.message, 'warn');
+                }
+
+                if (!parsed) {
+                    fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Using local parser...';
+                    try {
+                        parsed = enhancedResumeParser(state.resumeText);
+                        if (parsed && parsed.personalInfo && parsed.personalInfo.fullName) {
+                            log('✅ Enhanced parser succeeded.', 'success');
+                        } else {
+                            parsed = null;
+                        }
+                    } catch (e) {
+                        log('⚠️ Enhanced parser error: ' + e.message, 'warn');
+                    }
+                }
+
+                if (!parsed) {
+                    log('ℹ️ Using fallback simple parser.', 'info');
+                    parsed = parseResumeSimple(state.resumeText);
+                }
+
                 if (parsed) {
                     state.resumeStructured = parsed;
                     renderResumePreview(parsed);
                     fillFormFields(parsed);
-                    log('✅ Resume parsed and fields filled.', 'success');
+                    log('✅ Personal info fetched and filled successfully!', 'success');
+                    fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-check"></i> Fetched!';
+                    setTimeout(() => {
+                        fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
+                        fetchPersonalInfoBtn.disabled = false;
+                    }, 2000);
                 } else {
-                    log('⚠️ Could not parse resume. Try fetching manually.', 'warn');
-                }
-
-                if (!state.engine) {
-                    if (!initRAGina()) return;
-                }
-
-                const sections = { 'resume': { bodyText: text } };
-                try {
-                    state.engine.buildIndex(sections, 200);
-                    log('✅ RAGina index built.', 'success');
-                    updateGenerateButton();
-                } catch (e) {
-                    log('❌ Index error: ' + e.message, 'error');
+                    log('❌ All parsing methods failed.', 'error');
+                    fetchPersonalInfoBtn.innerHTML = '<i class="fas fa-magic"></i> Fetch Personal Info';
+                    fetchPersonalInfoBtn.disabled = false;
                 }
             }
 
-            // ─── UPDATE BUTTONS ─────────────────────────────────────
+            // ─── BUILD RESUME TEXT ──────────────────────────────────────
+            function buildResumeTextFromStructured(structured) {
+                let text = '';
+                const pi = structured.personalInfo || {};
+                if (pi.fullName) text += pi.fullName + '\n';
+                if (pi.email) text += 'Email: ' + pi.email + '\n';
+                if (pi.phone) text += 'Phone: ' + pi.phone + '\n';
+                if (pi.location) text += 'Location: ' + pi.location + '\n';
+                if (pi.linkedin) text += 'LinkedIn: ' + pi.linkedin + '\n';
+                if (pi.github) text += 'GitHub: ' + pi.github + '\n';
+                text += '\n';
+
+                if (structured.summary) text += 'SUMMARY\n' + structured.summary + '\n\n';
+                if (structured.skills) text += 'SKILLS\n' + structured.skills + '\n\n';
+
+                const exp = structured.experience || [];
+                if (exp.length > 0) {
+                    text += 'EXPERIENCE\n';
+                    exp.forEach(e => {
+                        text += e.title + (e.company ? ' at ' + e.company : '') + (e.dates ? ' (' + e.dates +
+                            ')' : '') + '\n';
+                        if (e.bullets) {
+                            e.bullets.forEach(b => { text += '  • ' + b + '\n'; });
+                        }
+                        text += '\n';
+                    });
+                }
+
+                if (structured.education) text += 'EDUCATION\n' + structured.education + '\n\n';
+                if (structured.certifications) text += 'CERTIFICATIONS\n' + structured.certifications + '\n\n';
+
+                const projects = structured.projects || [];
+                if (projects.length > 0) {
+                    text += 'PROJECTS\n';
+                    projects.forEach(p => { text += '  • ' + p + '\n'; });
+                }
+
+                return text;
+            }
+
+            // ─── UPDATE GENERATE BUTTON ──────────────────────────────
             function updateGenerateButton() {
                 const hasJD = state.jobDescription && state.jobDescription.description;
                 const hasEngine = state.engine && state.engine.isReady;
                 generateBtn.disabled = !(hasJD && hasEngine && !state.isProcessing);
             }
 
-            // ─── GENERATE CONTENT ──────────────────────────────────
+            // ─── GENERATE CONTENT ──────────────────────────────────────
             async function generateContent() {
                 if (state.isProcessing) return;
                 if (!state.engine || !state.engine.isReady) {
@@ -2134,119 +2739,7 @@
                 }
             }
 
-            // ─── BUILD RESUME TEXT FROM STRUCTURED DATA ──────────────
-            function buildResumeTextFromStructured(structured) {
-                let text = '';
-                const pi = structured.personalInfo || {};
-                if (pi.fullName) text += pi.fullName + '\n';
-                if (pi.email) text += 'Email: ' + pi.email + '\n';
-                if (pi.phone) text += 'Phone: ' + pi.phone + '\n';
-                if (pi.location) text += 'Location: ' + pi.location + '\n';
-                if (pi.linkedin) text += 'LinkedIn: ' + pi.linkedin + '\n';
-                if (pi.github) text += 'GitHub: ' + pi.github + '\n';
-                text += '\n';
-
-                if (structured.summary) text += 'SUMMARY\n' + structured.summary + '\n\n';
-                if (structured.skills) text += 'SKILLS\n' + structured.skills + '\n\n';
-
-                const exp = structured.experience || [];
-                if (exp.length > 0) {
-                    text += 'EXPERIENCE\n';
-                    exp.forEach(e => {
-                        text += e.title + (e.company ? ' at ' + e.company : '') + (e.dates ? ' (' + e.dates +
-                            ')' : '') + '\n';
-                        if (e.bullets) {
-                            e.bullets.forEach(b => { text += '  • ' + b + '\n'; });
-                        }
-                        text += '\n';
-                    });
-                }
-
-                if (structured.education) text += 'EDUCATION\n' + structured.education + '\n\n';
-                if (structured.certifications) text += 'CERTIFICATIONS\n' + structured.certifications + '\n\n';
-
-                const projects = structured.projects || [];
-                if (projects.length > 0) {
-                    text += 'PROJECTS\n';
-                    projects.forEach(p => { text += '  • ' + p + '\n'; });
-                }
-
-                return text;
-            }
-
-            // ─── ADD CURIFY BUTTONS WITH CUSTOM PROMPT ──────────────
-            function addCurifyButtons() {
-                const sectionKeys = ['summary', 'skills', 'experience', 'projects', 'education', 'certifications'];
-                const sectionLabels = {
-                    summary: 'Professional Summary',
-                    skills: 'Technical Skills',
-                    experience: 'Professional Experience',
-                    projects: 'Projects',
-                    education: 'Education',
-                    certifications: 'Certifications'
-                };
-
-                for (const key of sectionKeys) {
-                    const card = document.getElementById(`section-${key}`);
-                    if (!card) continue;
-
-                    let actions = card.querySelector('.section-actions');
-                    if (!actions) {
-                        actions = document.createElement('div');
-                        actions.className = 'section-actions';
-                        card.appendChild(actions);
-                    }
-
-                    actions.innerHTML = '';
-
-                    const curifyBtn = document.createElement('button');
-                    curifyBtn.className = 'btn btn-curify';
-                    curifyBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Curify';
-                    curifyBtn.dataset.section = key;
-                    curifyBtn.addEventListener('click', function() {
-                        curifySection(key);
-                    });
-                    actions.appendChild(curifyBtn);
-
-                    const copyBtn = document.createElement('button');
-                    copyBtn.className = 'btn btn-secondary';
-                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                    copyBtn.addEventListener('click', function() {
-                        const text = state.sections[key] || '';
-                        navigator.clipboard.writeText(text).then(function() {
-                            copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
-                            setTimeout(function() { copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy'; },
-                            1500);
-                        }).catch(function() {
-                            log('⚠️ Clipboard copy failed. Select and copy manually.', 'warn');
-                        });
-                    });
-                    actions.appendChild(copyBtn);
-
-                    const promptToggle = document.createElement('button');
-                    promptToggle.className = 'prompt-toggle';
-                    promptToggle.innerHTML = '<i class="fas fa-pen"></i> Custom Prompt';
-                    promptToggle.addEventListener('click', function() {
-                        const input = actions.querySelector('.custom-prompt-input');
-                        if (input) {
-                            input.classList.toggle('active');
-                            if (input.classList.contains('active')) {
-                                input.focus();
-                            }
-                        }
-                    });
-                    actions.appendChild(promptToggle);
-
-                    const promptInput = document.createElement('input');
-                    promptInput.type = 'text';
-                    promptInput.className = 'custom-prompt-input';
-                    promptInput.placeholder = 'e.g., Focus on leadership, Add more technical details...';
-                    promptInput.dataset.section = key;
-                    actions.appendChild(promptInput);
-                }
-            }
-
-            // ─── CURIFY SECTION ──────────────────────────────────
+            // ─── CURIFY SECTION ──────────────────────────────────────────
             async function curifySection(sectionKey) {
                 const card = document.getElementById(`section-${sectionKey}`);
                 if (!card) return;
@@ -2345,7 +2838,7 @@
                 }
             }
 
-            // ─── UPDATE SECTION CONTENT ──────────────────────────────────
+            // ─── UPDATE SECTION CONTENT ──────────────────────────────
             function updateSectionContent(key, content) {
                 const el = document.getElementById(`content-${key}`);
                 if (el) {
@@ -2360,7 +2853,7 @@
                 }
             }
 
-            // ─── SHOW LOADING SECTIONS ──────────────────────────────────
+            // ─── SHOW LOADING SECTIONS ──────────────────────────────
             function showLoadingSections() {
                 const configs = [
                     { key: 'summary', label: 'Professional Summary', icon: 'fa-user-tie' },
@@ -2385,6 +2878,118 @@
                 `;
                 }
                 sectionsContainer.innerHTML = html;
+            }
+
+            // ─── ADD CURIFY BUTTONS ──────────────────────────────────
+            function addCurifyButtons() {
+                const sectionKeys = ['summary', 'skills', 'experience', 'projects', 'education', 'certifications'];
+                const sectionLabels = {
+                    summary: 'Professional Summary',
+                    skills: 'Technical Skills',
+                    experience: 'Professional Experience',
+                    projects: 'Projects',
+                    education: 'Education',
+                    certifications: 'Certifications'
+                };
+
+                for (const key of sectionKeys) {
+                    const card = document.getElementById(`section-${key}`);
+                    if (!card) continue;
+
+                    let actions = card.querySelector('.section-actions');
+                    if (!actions) {
+                        actions = document.createElement('div');
+                        actions.className = 'section-actions';
+                        card.appendChild(actions);
+                    }
+
+                    actions.innerHTML = '';
+
+                    const curifyBtn = document.createElement('button');
+                    curifyBtn.className = 'btn btn-curify';
+                    curifyBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Curify';
+                    curifyBtn.dataset.section = key;
+                    curifyBtn.addEventListener('click', function() {
+                        curifySection(key);
+                    });
+                    actions.appendChild(curifyBtn);
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn btn-secondary';
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    copyBtn.addEventListener('click', function() {
+                        const text = state.sections[key] || '';
+                        navigator.clipboard.writeText(text).then(function() {
+                            copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                            setTimeout(function() { copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy'; },
+                            1500);
+                        }).catch(function() {
+                            log('⚠️ Clipboard copy failed. Select and copy manually.', 'warn');
+                        });
+                    });
+                    actions.appendChild(copyBtn);
+
+                    const promptToggle = document.createElement('button');
+                    promptToggle.className = 'prompt-toggle';
+                    promptToggle.innerHTML = '<i class="fas fa-pen"></i> Custom Prompt';
+                    promptToggle.addEventListener('click', function() {
+                        const input = actions.querySelector('.custom-prompt-input');
+                        if (input) {
+                            input.classList.toggle('active');
+                            if (input.classList.contains('active')) {
+                                input.focus();
+                            }
+                        }
+                    });
+                    actions.appendChild(promptToggle);
+
+                    const promptInput = document.createElement('input');
+                    promptInput.type = 'text';
+                    promptInput.className = 'custom-prompt-input';
+                    promptInput.placeholder = 'e.g., Focus on leadership, Add more technical details...';
+                    promptInput.dataset.section = key;
+                    actions.appendChild(promptInput);
+                }
+            }
+
+            // ─── ASSEMBLE FULL RESUME TEXT ──────────────────────────
+            function assembleFullResumeText() {
+                const labels = {
+                    summary: 'PROFESSIONAL SUMMARY',
+                    skills: 'TECHNICAL SKILLS',
+                    experience: 'PROFESSIONAL EXPERIENCE',
+                    projects: 'PROJECTS',
+                    education: 'EDUCATION',
+                    certifications: 'CERTIFICATIONS'
+                };
+                const order = ['summary', 'skills', 'experience', 'projects', 'education', 'certifications'];
+                let out = [];
+                for (const key of order) {
+                    const content = (state.sections[key] || '').trim();
+                    if (!content) continue;
+                    out.push(`${labels[key]}\n${'─'.repeat(labels[key].length)}\n${content}`);
+                }
+                return out.join('\n\n');
+            }
+
+            // ─── DOWNLOAD RESUME DATA AS JSON ─────────────────────────
+            function downloadResumeJSON() {
+                const data = getEditedResumeData();
+                if (!data) {
+                    log('⚠️ No resume data to download.', 'warn');
+                    return;
+                }
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `curvina_resume_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                log('✅ Resume JSON downloaded.', 'success');
             }
 
             // ─── CLEAR ALL ──────────────────────────────────────────────
@@ -2454,33 +3059,24 @@
 
             debugToggleBtn.addEventListener('click', toggleDebug);
 
-            // ─── ASSEMBLE FULL RESUME TEXT ──────────────────────────────
-            function assembleFullResumeText() {
-                const labels = {
-                    summary: 'PROFESSIONAL SUMMARY',
-                    skills: 'TECHNICAL SKILLS',
-                    experience: 'PROFESSIONAL EXPERIENCE',
-                    projects: 'PROJECTS',
-                    education: 'EDUCATION',
-                    certifications: 'CERTIFICATIONS'
-                };
-                const order = ['summary', 'skills', 'experience', 'projects', 'education', 'certifications'];
-                let out = [];
-                for (const key of order) {
-                    const content = (state.sections[key] || '').trim();
-                    if (!content) continue;
-                    out.push(`${labels[key]}\n${'─'.repeat(labels[key].length)}\n${content}`);
-                }
-                return out.join('\n\n');
-            }
-
             // ─── EVENT LISTENERS ──────────────────────────────────
             fetchBtn.addEventListener('click', async function() {
                 const url = urlInput.value.trim();
-                if (!url) { log('⚠️ Enter a URL.', 'warn'); return; }
+                if (!url) {
+                    log('⚠️ Enter a URL.', 'warn');
+                    return;
+                }
+                // Reset proxy index for fresh attempt
                 currentProxyIndex = 0;
                 fetchFailSuggestion.style.display = 'none';
-                await fetchWithRetry(url);
+                fetchBtn.disabled = true;
+                fetchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+                try {
+                    await fetchWithRetry(url);
+                } finally {
+                    fetchBtn.disabled = false;
+                    fetchBtn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Fetch JD';
+                }
             });
 
             urlInput.addEventListener('keypress', function(e) {
@@ -2491,10 +3087,8 @@
             resumeFileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(ev) { loadResume(ev.target.result, file.name); };
-                reader.onerror = function() { log('❌ Failed to read file.', 'error'); };
-                reader.readAsText(file);
+                loadResume(file);
+                e.target.value = '';
             });
 
             resumeDrop.addEventListener('dragover', function(e) {
@@ -2513,10 +3107,7 @@
                 this.style.background = 'rgba(255,255,255,0.3)';
                 const file = e.dataTransfer.files[0];
                 if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(ev) { loadResume(ev.target.result, file.name); };
-                    reader.readAsText(file);
-                    resumeFileInput.files = e.dataTransfer.files;
+                    loadResume(file);
                 }
             });
 
@@ -2534,6 +3125,7 @@
             fetchPersonalInfoBtn.addEventListener('click', fetchPersonalInfo);
             saveResumeBtn.addEventListener('click', saveResumeData);
             clearResumeBtn.addEventListener('click', clearResumeForm);
+            downloadJsonBtn.addEventListener('click', downloadResumeJSON);
 
             copyAllBtn.addEventListener('click', function() {
                 const text = assembleFullResumeText();
